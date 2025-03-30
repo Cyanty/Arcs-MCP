@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+    <!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">   -->
+
+    <meta name="description" content="index">
+    <meta name="author" content="lcy">
+<!--    <link rel="icon" href="../../../../favicon.ico">-->
+
+    <title>Upload & Publish</title>
+  </head>
+
+
+  <body>
+    <div class="container">
+        <h2>设置发布源开关</h2>
+        <div id="toggleContainer">
+            <span class="shifted-text">CSDN</span>
+            <label class="switch">
+                <input type="checkbox" id="csdn" class="toggleButton">
+                <span class="slider"></span>
+            </label>
+            <span class="shifted-text">掘金</span>
+            <label class="switch">
+                <input type="checkbox" id="juejin" class="toggleButton">
+                <span class="slider"></span>
+            </label>
+            <span class="shifted-text">博客园</span>
+            <label class="switch">
+                <input type="checkbox" id="cnblogs" class="toggleButton">
+                <span class="slider"></span>
+            </label>
+            <span class="shifted-text">微信公众号</span>
+            <label class="switch">
+                <input type="checkbox" id="wechat" class="toggleButton">
+                <span class="slider"></span>
+            </label>
+            <span class="shifted-text">Halo博客</span>
+            <label class="switch">
+                <input type="checkbox" id="halo" class="toggleButton">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr>
+
+        <h2>刷新cookies按钮</h2>
+        <button id="requestButton">点击刷新cookies</button>
+        <div id="response">{{ refresh }}</div>
+        <hr>
+
+        <h1>上传发布文章文件</h1>
+        <form action="/uploader/mdfile" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">选择一个Markdown文件 (.md):</label><br>
+                <input type="file" id="file" name="file" accept=".md" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">上传</button>
+            </div>
+        </form>
+        <hr>
+
+        <!-- 显示上传结果的区域 -->
+        <h2>发布结果</h2>
+        <table>
+            <tr>
+                <th>发布平台</th>
+                <th>发布结果</th>
+            </tr>
+            <tr>
+                <td>CSDN</td>
+                <td class="result">{{ result_dict.csdn.result }}</td>
+            </tr>
+            <tr>
+                <td>掘金</td>
+                <td class="result">{{ result_dict.juejin.result }}</td>
+            </tr>
+            <tr>
+                <td>博客园</td>
+                <td class="result">{{ result_dict.cnblogs.result }}</td>
+            </tr>
+            <tr>
+                <td>微信公众号</td>
+                <td class="result">{{ result_dict.wechat.result }}</td>
+            </tr>
+            <tr>
+                <td>Halo博客</td>
+                <td class="result">{{ result_dict.halo.result }}</td>
+            </tr>
+        </table>
+
+    </div>
+
+
+    <script>
+        const toggleContainer = document.getElementById('toggleContainer');
+
+        window.onload = function() {
+            // 调用 /state 接口
+            fetch('/state')
+                .then(response => response.json())
+                .then(data => {
+                    setToggleStates(data);
+                })
+                .catch(error => console.error('Error:', error));
+        };
+
+         // 根据 JSON 数据设置开关状态的函数
+        function setToggleStates(data) {
+            const toggles = toggleContainer.querySelectorAll('input[type="checkbox"]');
+            toggles.forEach((toggle, index) => {
+                for (const [key, value] of Object.entries(data)) {
+                    if (toggle.id === key) {
+                        toggle.checked = value;
+                    }
+                }
+            })
+        }
+
+        // 添加点击事件监听器
+        toggleContainer.addEventListener('change', async (event) => {
+            // 检查事件目标是否是带有特定类名的元素
+            if (event.target.classList.contains('toggleButton')) {
+                const toggleButton = event.target;
+                const newState = toggleButton.checked;
+                try {
+                    const response = await fetch('/state/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({type: toggleButton.id, new_state: newState})
+                    });
+                    const data = await response.json();
+                    console.log('Button state updated:', data.response);
+                } catch (error) {
+                    console.error('Error updating button state:', error);
+                }
+            }
+        });
+
+        document.getElementById('requestButton').addEventListener('click', function() {
+            fetch('/cookies/refresh')
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('response').innerText = "成功刷新浏览器cookies!";
+                    } else {
+                        document.getElementById('response').innerText = "刷新浏览器cookies失败!";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('response').innerText = '刷新浏览器cookies失败!';
+                });
+        });
+    </script>
+
+{#    <script>#}
+{#     window.difyChatbotConfig = {#}
+{#      token: '93TiklhJjTLxn1cq',#}
+{#      baseUrl: 'http://192.168.1.199'#}
+{#     }#}
+{#    </script>#}
+{#    <script#}
+{#     src="http://192.168.1.199/embed.min.js"#}
+{#     id="93TiklhJjTLxn1cq"#}
+{#     defer>#}
+{#    </script>#}
+{#    <style>#}
+{#      #dify-chatbot-bubble-button {#}
+{#        background-color: #1C64F2 !important;#}
+{#      }#}
+{#      #dify-chatbot-bubble-window {#}
+{#        width: 24rem !important;#}
+{#        height: 40rem !important;#}
+{#      }#}
+{#    </style>#}
+
+
+  </body>
+
+
+</html>
