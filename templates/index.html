@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
     <!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">   -->
-
     <meta name="description" content="index">
     <meta name="author" content="lcy">
 <!--    <link rel="icon" href="../../../../favicon.ico">-->
@@ -72,23 +71,23 @@
             </tr>
             <tr>
                 <td>CSDN</td>
-                <td class="result">{{ result_dict.csdn.result }}</td>
+                <td class="result">{{ data.result_dict.csdn.result }}</td>
             </tr>
             <tr>
                 <td>掘金</td>
-                <td class="result">{{ result_dict.juejin.result }}</td>
+                <td class="result">{{ data.result_dict.juejin.result }}</td>
             </tr>
             <tr>
                 <td>博客园</td>
-                <td class="result">{{ result_dict.cnblogs.result }}</td>
+                <td class="result">{{ data.result_dict.cnblogs.result }}</td>
             </tr>
             <tr>
                 <td>微信公众号</td>
-                <td class="result">{{ result_dict.wechat.result }}</td>
+                <td class="result">{{ data.result_dict.wechat.result }}</td>
             </tr>
             <tr>
                 <td>Halo博客</td>
-                <td class="result">{{ result_dict.halo.result }}</td>
+                <td class="result">{{ data.result_dict.halo.result }}</td>
             </tr>
         </table>
 
@@ -96,6 +95,26 @@
 
 
     <script>
+        const t_data = {{ data | tojson }};
+        if (t_data.show_confirm) {
+            alert("检测到浏览器环境需要更新，需重启浏览器（默认为谷歌浏览器）。\n" +
+                "点击“确认”将立即重启浏览器。\n" +
+                "警告：重启浏览器将强制关闭所有浏览器窗口，未保存的数据可能会丢失。请确保已保存所有重要数据。");
+
+            fetch('/browser/handle_confirm')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('IsConfirmed response was not ok');
+                }
+            })
+            .then(data => {
+                console.log(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
         const toggleContainer = document.getElementById('toggleContainer');
 
         window.onload = function() {
@@ -127,15 +146,14 @@
                 const toggleButton = event.target;
                 const newState = toggleButton.checked;
                 try {
-                    const response = await fetch('/state/toggle', {
+                    await fetch('/state/toggle', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({type: toggleButton.id, new_state: newState})
                     });
-                    const data = await response.json();
-                    console.log('Button state updated:', data.response);
+                    console.log('Button state updated.');
                 } catch (error) {
                     console.error('Error updating button state:', error);
                 }
@@ -143,7 +161,7 @@
         });
 
         document.getElementById('requestButton').addEventListener('click', function() {
-            fetch('/cookies/refresh')
+            fetch('/browser/cookies/refresh')
                 .then(response => {
                     if (response.ok) {
                         document.getElementById('response').innerText = "成功刷新浏览器cookies!";

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from extension.crawler_factory import get_crawler_setup_source
+from web.schemas.response import BaseResponse
 from web.schemas.state import ToggleState
 
 router = APIRouter(prefix="/state", tags=["发布源状态管理"])
@@ -14,5 +15,5 @@ async def toggle_switch():
 async def toggle_switch(toggle_state: ToggleState):
     if toggle_state.type in get_crawler_setup_source():
         get_crawler_setup_source()[toggle_state.type] = toggle_state.new_state
-    return {"response": 200}
+    return BaseResponse()
 

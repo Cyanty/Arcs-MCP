@@ -1,80 +1,19 @@
 # -*- coding: utf-8 -*-
-import re
 import platform
-import subprocess
-import time
-import json
-from typing import Dict, Optional, Tuple
+import psutil
+from typing import Dict, List, Tuple
 from DrissionPage._base.chromium import Chromium
-from DrissionPage._configs.chromium_options import ChromiumOptions
-from DrissionPage._pages.chromium_page import ChromiumPage
 from concurrent.futures import ThreadPoolExecutor
+from environment.dp_obj import SingletonDrissionPage
 from utils import logger
-from utils.decorator_util import singleton
 
 
-@singleton
-class SingletonDrissionPage:
-    """
-    from DrissionPage import ChromiumOptions
-    co = ChromiumOptions()
-    co.use_system_user_path()
-    co.headless(True)
-    co.save('environment/config1.ini')  # 把这个配置记录到 ini 文件
-
-    from DrissionPage.common import configs_to_here
-    configs_to_here()  # 项目文件夹会多出一个'dp_configs.ini'文件,页面对象初始化时会优先读取这个文件
-
-    调式模式要求一个端口绑定一个用户文件目录，
-    反之，默认系统用户目录不能绑定多个浏览器（默认双击打开浏览器时，再启动dp指定系统用户目录会报错）
-    """
-    def __init__(self):
-        self.co: ChromiumOptions = ChromiumOptions()
-        self.headless = False
-        self.browser: Optional[Chromium] = None
-        self._all_cookies_dicts: dict = {}
-        self.executor = ThreadPoolExecutor(max_workers=20)
-        self._init_browser()
-
-    def _init_browser(self) -> None:
-        logger.info('SingletonDrissionPage: Start Chromium Browser.')
-        self.co.set_local_port(port=9222)
-        self.co.use_system_user_path(on_off=True)
-        self.co.headless(on_off=self.headless)
-        self.browser = Chromium(addr_or_opts=self.co)
-        self.refresh_cookies()
-
-    def refresh_cookies(self):
-        brower_cookies_as_json = self.browser.cookies(all_info=False).as_json()
-        brower_cookies_list = json.loads(brower_cookies_as_json)
-        self._tab_cookies_to_dict(brower_cookies_list)
-
-    def _tab_cookies_to_dict(self, brower_cookies_list):
-        for tab_cookies in brower_cookies_list:
-            domain = self._process_domain(tab_cookies['domain'])
-            if domain not in self._all_cookies_dicts:
-                self._all_cookies_dicts[domain] = {}
-            self._all_cookies_dicts[domain].update({tab_cookies['name']: tab_cookies['value']})
-
-    @staticmethod
-    def _process_domain(domain: str) -> str:
-        parts = domain.split('.')
-        if domain.endswith('.com.cn') and len(parts) >= 3:
-            return '.' + '.'.join(parts[-3:])
-        if re.match(r'^(\d{1,3}\.){3}\d{1,3}$', domain):
-            return domain
-        if len(parts) >= 2:
-            return '.' + '.'.join(parts[-2:])
-
-    def get_cookies_from_chromium(self, cookies_key: str) -> Dict[str, str]:
-        return self._all_cookies_dicts.get(cookies_key)
-
-    def get_chromium_browser_signal(self) -> Tuple[Chromium, ThreadPoolExecutor]:
-        return self.browser, self.executor
+def dp_instance() -> SingletonDrissionPage:
+    return SingletonDrissionPage()
 
 
-def _kill_browsers(browsers: list):
-    """
+def browser_process_names(browser: str) -> Tuple[List[str], str]:
+    """ 各平台浏览器及进程名统计:
       browsers = [
         "chrome",  # Google Chrome
         "firefox",  # Mozilla Firefox
@@ -83,68 +22,170 @@ def _kill_browsers(browsers: list):
         "safari",  # Safari (macOS)
         "brave",  # Brave Browser
         "chromium-browser"  # Chromium (Linux)
-    ]
+      ]
 
-     chrome_names = {
+      chrome_names = {
         "Windows": ["chrome.exe"],  # chrome - Windows常见进程名
         "Linux": ["chrome", "google-chrome", "chromium"],  # chrome - Linux常见进程名变体
         "Darwin": ["Google Chrome"]  # chrome - macOS常见应用名
-    }
+      }
     """
+    process_names = {
+            "chrome": {
+                "Windows": ["chrome.exe"],
+                "Linux": ["chrome", "google-chrome", "chromium"],
+                "Darwin": ["Google Chrome"]
+            },
+            "firefox": {
+                "Windows": ["firefox.exe"],
+                "Linux": ["firefox"],
+                "Darwin": ["firefox"]
+            },
+            "msedge": {
+                "Windows": ["msedge.exe"],
+                "Linux": ["microsoft-edge", "msedge"],
+                "Darwin": ["Microsoft Edge"]
+            },
+            "opera": {
+                "Windows": ["opera.exe"],
+                "Linux": ["opera"],
+                "Darwin": ["Opera"]
+            },
+            "safari": {
+                "Windows": [],
+                "Linux": [],
+                "Darwin": ["Safari"]
+            },
+            "brave": {
+                "Windows": ["brave.exe"],
+                "Linux": ["brave-browser"],
+                "Darwin": ["Brave Browser"]
+            },
+            "chromium-browser": {
+                "Windows": ["chromium.exe"],
+                "Linux": ["chromium-browser", "chromium"],
+                "Darwin": ["Chromium"]
+            }
+        }
     system = platform.system()
+    return process_names.get(browser, {}).get(system, []), system
+
+
+def is_browser_open(browser_name: str):
+    names, _ = browser_process_names(browser_name)
+    for proc in psutil.process_iter(['pid', 'name']):
+        try:
+            if any(target_name.lower() in proc.name().lower() for target_name in names):
+                logger.info(f"✅ Browser is open: PID={proc.pid} NAME={proc.name()}")
+                return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    logger.info("❌ Browser is not open.")
+    return False
+
+
+def check_browser_remote_debugging(browser_name: str):
+    names, _ = browser_process_names(browser_name)
+    for conn in psutil.net_connections():
+        if conn.status == 'LISTEN' and conn.laddr.port == 9222:
+            pid = conn.pid
+            if pid:
+                try:
+                    proc = psutil.Process(pid)
+                    if any(target_name.lower() in proc.name().lower() for target_name in names):
+                        logger.info(f"✅ Browser remote debug mode is enabled: PID={pid} NAME={proc.name()}")
+                        return True
+                except psutil.NoSuchProcess:
+                    pass
+    logger.info("❌ Browser remote debug mode is not enabled (port 9222 is not used by the browser).")
+    return False
+
+
+def proc_process_browsers(browsers: List, killed=False):
+    for browser in browsers:
+        names, system = browser_process_names(browser)
+        if not names:
+            logger.warning(f"{browser} is skipped, the browser process name for the {system} system is not configured.")
+            continue
+
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                proc_name = proc.name()
+                if system == "Windows":
+                    proc_name = proc_name.lower()
+                    target_names = [n.lower() for n in names]
+                else:
+                    target_names = names
+
+                if proc_name in target_names:
+                    logger.info(f"Terminating process: PID={proc.pid} NAME={proc_name}")
+                    if not killed:
+                        proc.terminate()  # 先尝试正常终止
+                    else:
+                        proc.kill()
+                    proc.wait(timeout=2)
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                continue
+
+
+def _kill_browsers(browsers: List):
+    """ 使用 psutil 终止指定浏览器的所有进程（跨平台实现）"""
     try:
-        if system == "Windows":
-            # Windows: 使用taskkill强制终止进程
-            for browser in browsers:
-                subprocess.run(
-                    ["taskkill", "/F", "/IM", f"{browser}.exe", "/T"],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    shell=True
-                )
-        elif system == "Linux":
-            # Linux: 使用pkill终止进程
-            for browser in browsers:
-                subprocess.run(
-                    ["pkill", "-f", browser],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
-                )
-        elif system == "Darwin":
-            # macOS: 使用killall终止进程
-            for browser in browsers:
-                subprocess.run(
-                    ["killall", "-9", browser],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
-                )
-        logger.info("已关闭所有浏览器进程")
-        time.sleep(2)  # 等待进程终止完成
+        [proc_process_browsers(browsers=browsers, killed=killed)
+         for killed in [False, True]]
+        logger.info("The browser process is terminated.")
     except Exception as e:
-        logger.error(f"操作失败: {str(e)}")
+        logger.error(f"Failed to terminate the browser process. Procedure: {str(e)}", exc_info=True)
 
 
-def _close_all_browsers():
-    confirm = input("警告：这将强制关闭浏览器，未保存的数据会丢失！\n确认继续？(y/n): ").lower()
-    if confirm == 'y':
-        _kill_browsers(["chrome", ])  # 默认关闭谷歌浏览器
-    else:
-        logger.info("关闭浏览器操作已取消！")
+def _close_all_browsers(first_startup=False):
+    browsers = ["chrome", ]  # 默认谷歌浏览器
+    is_killed = False
+    for browser in browsers:
+        if is_browser_open(browser) and not check_browser_remote_debugging(browser):
+            is_killed = True
+            break
+
+    if is_killed:
+        if first_startup:
+            confirm = input("警告：这将强制关闭浏览器，未保存的数据会丢失！\n确认继续？(y/n): ").lower()
+            if confirm == 'y':
+                _kill_browsers(browsers)
+            else:
+                logger.info("关闭浏览器操作已取消！")
+        else:
+            _kill_browsers(browsers)
 
 
 def get_sync_browser_init():
+    _close_all_browsers(first_startup=True)
+    dp_instance()
+
+
+def get_sync_browser_destroy():
+    dp_instance().destroy_browser_process()
+
+
+def check_browser_process_states() -> bool:
+    states = dp_instance().get_current_browser_states()
+    logger.info(f"返回浏览器是否仍可用: {states.is_alive}")
+    logger.info(f"返回浏览器是否接管的: {states.is_existed}")
+    return not states.is_alive
+
+
+def get_browser_by_reconnect():
     _close_all_browsers()
-    SingletonDrissionPage()
+    dp_instance().destroy_browser_process().init_browser_process()
 
 
 def get_cookies_from_chromium(cookies_key: str) -> Dict[str, str]:
-    return SingletonDrissionPage().get_cookies_from_chromium(cookies_key)
+    return dp_instance().get_cookies_from_chromium(cookies_key)
 
 
 def get_chromium_browser_signal() -> Tuple[Chromium, ThreadPoolExecutor]:
-    return SingletonDrissionPage().get_chromium_browser_signal()
+    return dp_instance().get_chromium_browser_signal()
 
 
 def browser_refresh_cookies():
-    SingletonDrissionPage().refresh_cookies()
+    dp_instance().refresh_cookies()
 

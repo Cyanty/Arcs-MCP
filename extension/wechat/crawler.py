@@ -4,9 +4,7 @@ import json
 import logging
 import re
 from typing import Optional, List, Dict, Any
-
 import markdown2
-
 from base import AbstractCrawler
 from config import WECHAT_PUBLIC_ACCOUNT
 from extension.wechat.client import WeChatClient

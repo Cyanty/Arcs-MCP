@@ -5,9 +5,10 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from environment import get_sync_browser_init
+from environment import get_sync_browser_init, check_browser_process_states, get_sync_browser_destroy
 from extension.crawler_factory import get_crawler_setup_source
 from utils import logger, load_single_router_from_source
+from web.schemas.home import HomePageData
 
 
 @asynccontextmanager
@@ -29,12 +30,11 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.dirna
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request,
-         "result_dict": {source: {'result': '还没有要发布文章~'} for source in get_crawler_setup_source()}
-         }
-    )
+    show_confirm = check_browser_process_states()
+    home_page_data = HomePageData(
+        result_dict={source: {'result': '还没有要发布文章~'} for source in get_crawler_setup_source()},
+        show_confirm=show_confirm)
+    return templates.TemplateResponse("index.html", {"request": request, "data": home_page_data.dict()})
 
 
 def app_startup():
@@ -44,7 +44,7 @@ def app_startup():
 
 
 def app_shutdown():
-    pass
+    get_sync_browser_destroy()
 
 
 def router_module_init():
@@ -67,5 +67,4 @@ def router_module_init():
         module = load_single_router_from_source(module_name=f"web.routers.{router_module_name}")
         if hasattr(module, "router"):
             app.include_router(module.router)
-        print(module)
 
