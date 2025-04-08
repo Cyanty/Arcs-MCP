@@ -13,7 +13,7 @@ def config_feature(model_name: str):
             if get_crawler_setup_source().get(model_name, False):
                 return await func(*args, **kwargs)
             else:
-                return {f"----- 警告：来源 < {model_name} > 未启用 -----"}
+                return {'result': f'发布来源 < {model_name.upper()} > 未启用'}
         return async_wrapper
     return decorator
 
