@@ -6,7 +6,7 @@ import re
 from typing import Optional, List, Dict, Any
 import markdown2
 from base import AbstractCrawler
-from config import WECHAT_PUBLIC_ACCOUNT
+from config import WECHAT_PUBLIC_ACCOUNT, WECHAT_AUTHOR
 from extension.wechat.client import WeChatClient
 
 from utils import request, logger
@@ -22,7 +22,7 @@ class WeChatCrawler(AbstractCrawler):
         html_content = markdown2.markdown(md_content, extras=AbstractCrawler.extensions2)
         return {
             'TITLE': file_name,
-            'AUTHOR': "天氰色等烟雨",  # 自定义作者名称
+            'AUTHOR': WECHAT_AUTHOR,  # 自定义作者名称
             'DIGEST': None,
             'CONTENT': html_content,
             'CONTENT_SOURCE_URL': None,

@@ -1,10 +1,7 @@
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
 """
-各平台账号的配置格式：
+各平台账号秘钥的配置格式：
 
     # 博客园metablog配置
     CNBLOGS_METABLOG_CONFIG = {

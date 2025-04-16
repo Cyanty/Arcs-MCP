@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 from base import AbstractCrawler
+from config import CNBLOGS_MT_KEYWORDS
 from extension.cnblogs.client import CnBlogsMetaBlogClient
 from utils import logger
 from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
@@ -20,7 +21,7 @@ class CnBlogsCrawler(AbstractCrawler):
             "title": file_name,
             "description": md_content,
             "categories": ["[Markdown]"],  # 设置默认为markdown编辑器
-            "mt_keywords": "大数据"  # 标签
+            "mt_keywords": CNBLOGS_MT_KEYWORDS  # 标签
         }
 
     async def init_config(self, file_name: str, md_content: str, image_results):
@@ -66,7 +67,7 @@ class CnBlogsCrawler(AbstractCrawler):
                 })
                 return {"old_image_url": image_url, "new_image_url": new_image_url.get("url")}
             except Exception as e:
-                logger.error(f"cnblogs 请求图片链接失败！- {e}")
+                logger.error(f"[{self.type_crawler}] Failed to request image link！- {e}")
 
 
 

@@ -3,6 +3,7 @@ import logging
 from typing import Dict
 from DrissionPage._functions.keys import Keys
 from base import AbstractCrawler
+from config import CSDN_LOC_TAG
 from environment import get_chromium_browser_signal
 from extension.csdn.client import CsdnClient
 from utils import logger, github_proxy_url
@@ -33,7 +34,7 @@ class CsdnCrawler(AbstractCrawler):
     def tab_publish_actions(self, browser) -> Dict:
         tab = browser.new_tab()
         try:
-            tab.get("https://editor.csdn.net/md/")  # tab_csdn.get("https://mp.csdn.net/mp_blog/creation/editor")
+            tab.get("https://editor.csdn.net/md/")  # "https://mp.csdn.net/mp_blog/creation/editor"
             tab.actions \
                 .click(on_ele=tab.ele(self._csdnClient.loc_title)).input(self._csdnClient.title_name) \
                 .click(on_ele=tab.ele(self._csdnClient.loc_content)).input(self._csdnClient.md_content).wait(0.25)
@@ -41,7 +42,7 @@ class CsdnCrawler(AbstractCrawler):
             tab.actions \
                 .click(on_ele=tab.ele(self._csdnClient.loc_send_button)).wait(0.25) \
                 .move_to(ele_or_loc=tab.ele(self._csdnClient.loc_add_tag)).wait(0.25) \
-                .click(on_ele=tab.ele(self._csdnClient.loc_tag_input)).input("大数据").wait(1) \
+                .click(on_ele=tab.ele(self._csdnClient.loc_tag_input)).input(CSDN_LOC_TAG).wait(1) \
                 .key_down(Keys.ENTER).wait(0.25) \
                 .click(on_ele=tab.ele(self._csdnClient.loc_close_button)) \
                 .click(on_ele=tab.ele(self._csdnClient.loc_publish_button))

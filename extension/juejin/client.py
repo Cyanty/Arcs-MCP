@@ -1,3 +1,4 @@
+from config import JUEJIN_CATEGORY_ID, JUEJIN_TAG_IDS
 from environment import get_cookies_from_chromium
 from DrissionPage._functions.by import By
 from base import AbstractClient, AbstractBrowserClient
@@ -89,9 +90,9 @@ class JueJinClient(AbstractClient, AbstractBrowserClient):
     def pre_json_data(self, value: dict):
         self._pre_json_data = {
             'id': value.get('id'),
-            'category_id': '6809637769959178254',  # 分类：后端
+            'category_id': JUEJIN_CATEGORY_ID,  # 分类：后端
             'tag_ids': [
-                '6809641131131797511',  # 标签：大数据
+                JUEJIN_TAG_IDS,  # 标签：大数据
             ],
             'link_url': '',
             'cover_image': '',
