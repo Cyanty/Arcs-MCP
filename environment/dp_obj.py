@@ -22,7 +22,8 @@ class SingletonDrissionPage:
     调式模式要求一个端口绑定一个用户文件目录，
     反之，默认系统用户目录不能绑定多个浏览器（默认双击打开浏览器时，再启动dp指定系统用户目录会报错）
     """
-    def __init__(self):
+    def __init__(self, user_path_on_off):
+        self.user_path_on_off: bool = user_path_on_off
         self.co: Optional[ChromiumOptions] = None
         self.headless = False
         self.browser: Optional[Chromium] = None
@@ -35,7 +36,7 @@ class SingletonDrissionPage:
         logger.info('<SingletonDrissionPage Class init>: Initialization Chromium Browser.')
         self.co = ChromiumOptions()
         self.co.set_local_port(port=9222)
-        self.co.use_system_user_path(on_off=True)
+        self.co.use_system_user_path(on_off=self.user_path_on_off)
         self.co.headless(on_off=self.headless)
         self.browser = Chromium(addr_or_opts=self.co)
         self.process_id = self.browser.process_id

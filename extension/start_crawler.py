@@ -11,7 +11,11 @@ def config_feature(model_name: str):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
             if get_crawler_setup_source().get(model_name, False):
-                return await func(*args, **kwargs)
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    logger.error(f"Publish failure < {model_name.upper()} > Crawler error: {e}")
+                    return {'result': f'发布来源 < {model_name.upper()} > 出现错误！'}
             else:
                 return {'result': f'发布来源 < {model_name.upper()} > 未启用'}
         return async_wrapper

@@ -1,3 +1,4 @@
+from DrissionPage._functions.by import By
 from base import AbstractClient
 
 
@@ -72,6 +73,14 @@ class WeChatClient(AbstractClient):
             "media_id": value
         }
 
+    # md2html格式转换页面元素
+    @property
+    def loc_code_mirror_scroll_editor(self):
+        return By.XPATH, '//div[@class="CodeMirror-scroll"]'
+
+    @property
+    def loc_nice_sidebar_wechat_copy(self):
+        return By.XPATH, '//*[@id="nice-sidebar-wechat"]'
 
 
 

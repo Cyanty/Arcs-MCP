@@ -5,11 +5,14 @@ import logging
 import re
 from typing import Optional, List, Dict, Any
 import markdown2
+from DrissionPage._functions.keys import Keys
+from DrissionPage._pages.mix_tab import MixTab
 from base import AbstractCrawler
-from config import WECHAT_PUBLIC_ACCOUNT, WECHAT_AUTHOR
+from config import WECHAT_PUBLIC_ACCOUNT, WECHAT_AUTHOR, WECHAT_MARKDOWN2HTML
+from environment import get_chromium_browser_signal
 from extension.wechat.client import WeChatClient
 
-from utils import request, logger
+from utils import request, logger, pyperclip_paste
 
 
 class WeChatCrawler(AbstractCrawler):
@@ -19,16 +22,20 @@ class WeChatCrawler(AbstractCrawler):
         self._weChatClient = WeChatClient()
 
     async def article_path_proc(self, file_name: str, md_content: str):
-        html_content = markdown2.markdown(md_content, extras=AbstractCrawler.extensions2)
-        return {
-            'TITLE': file_name,
-            'AUTHOR': WECHAT_AUTHOR,  # 自定义作者名称
-            'DIGEST': None,
-            'CONTENT': html_content,
-            'CONTENT_SOURCE_URL': None,
-            'THUMB_MEDIA_ID': "oL0UpGlBxdUv4oNzDuNmlBA_vUPdtm__P2wPG0TkzmKKXSKy1gGuwn3FZG640iZf",  # 文章封面（必须为永久素材id）
-            'X1_Y1_X2_Y2': None,
-        }
+        # html_content = markdown2.markdown(md_content, extras=AbstractCrawler.extensions2)  # 已作废
+        browser, executor = get_chromium_browser_signal()
+        loop = asyncio.get_running_loop()
+        html_content = await loop.run_in_executor(executor, self.tab_md2html_actions, browser, md_content)
+        if html_content:
+            return {
+                'TITLE': file_name,
+                'AUTHOR': WECHAT_AUTHOR,  # 自定义作者名称
+                'DIGEST': None,
+                'CONTENT': html_content,
+                'CONTENT_SOURCE_URL': None,
+                'THUMB_MEDIA_ID': "oL0UpGlBxdUv4oNzDuNmlBA_vUPdtm__P2wPG0TkzmKKXSKy1gGuwn3FZG640iZf",  # 文章封面（必须为永久素材id）
+                'X1_Y1_X2_Y2': None,
+            }
 
     async def init_config(self, file_name: str, md_content: str, image_results: Optional[List[Dict[str, Any]]]):
         logger.info(f"[{self.type_crawler}] Start initializing and processing image links.")
@@ -88,6 +95,25 @@ class WeChatCrawler(AbstractCrawler):
             if 200 <= status_code < 300:
                 return {"old_image_url": image_result["image_url"], "new_image_url": response_json["url"]}
 
+    def tab_md2html_actions(self, browser, md_content):
+        tab: MixTab = browser.new_tab()
+        try:
+            tab.get(WECHAT_MARKDOWN2HTML)  # 跳转md2html格式转换页面
+            tab.refresh()
+
+            tab.actions\
+                .click(on_ele=tab.ele(self._weChatClient.loc_code_mirror_scroll_editor))\
+                .type(Keys.CTRL_A).key_down(Keys.BACKSPACE)\
+                .input(md_content).wait(0.15)
+            tab.wait.load_start()
+
+            paste_adapt = lambda: tab.actions.click(on_ele=tab.ele(self._weChatClient.loc_nice_sidebar_wechat_copy))
+            html_content = pyperclip_paste(post_action=paste_adapt)
+            return html_content
+        except Exception as e:
+            logger.error(f'[{self.type_crawler}] Failure to md2html conversion of the article! Cause of error:{e}')
+        finally:
+            tab.close()
 
 
 

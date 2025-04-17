@@ -9,7 +9,11 @@ from utils import logger
 
 
 def dp_instance() -> SingletonDrissionPage:
-    return SingletonDrissionPage()
+    return SingletonDrissionPage(user_path_on_off=True)
+
+
+def dp_instance_test() -> SingletonDrissionPage:
+    return SingletonDrissionPage(user_path_on_off=False)
 
 
 def browser_process_names(browser: str) -> Tuple[List[str], str]:

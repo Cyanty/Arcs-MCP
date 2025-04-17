@@ -5,7 +5,7 @@ from DrissionPage._functions.keys import Keys
 from base import AbstractCrawler
 from environment import get_chromium_browser_signal
 from extension.juejin.client import JueJinClient
-from utils import *
+from utils import logger, request, pyperclip_copy
 
 
 class JueJinCrawler(AbstractCrawler):
@@ -50,7 +50,7 @@ class JueJinCrawler(AbstractCrawler):
             loop = asyncio.get_running_loop()
             return await loop.run_in_executor(executor, self.tab_publish_actions, browser)
         else:
-            logging.error(f'[{self.type_crawler}] Failure to publish the article! Cause of error: Http Response Text -> {str(result)}')
+            logger.error(f'[{self.type_crawler}] Failure to publish the article! Cause of error: Http Response Text -> {str(result)}')
             return {'result': AbstractCrawler.FAILURE_RESULT}
 
     async def request_post(self, url_type, json_data_type):
@@ -66,10 +66,10 @@ class JueJinCrawler(AbstractCrawler):
     def tab_publish_actions(self, browser) -> Dict:
         tab = browser.new_tab()
         try:
-            pyperclip.copy(self._jueJinClient.md_content)
             tab.get('https://juejin.cn/editor/drafts/' + self._jueJinClient.host)
-            tab.actions \
+            copy_adapt = lambda: tab.actions \
                 .click(on_ele=tab.ele(self._jueJinClient.loc_content)).type(Keys.CTRL_V).wait(0.25)
+            pyperclip_copy(self._jueJinClient.md_content, post_action=copy_adapt)
             tab.wait.load_start()
             tab.actions \
                 .click(on_ele=tab.ele(self._jueJinClient.loc_publish_button)).wait(0.5) \
