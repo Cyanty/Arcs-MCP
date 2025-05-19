@@ -36,6 +36,7 @@ class SingletonDrissionPage:
     def _init_browser(self) -> None:
         logger.info('<SingletonDrissionPage Class init>: Initialization Chromium Browser.')
         self.co = ChromiumOptions()
+        self.co.set_argument("--start-maximized")
         self.co.set_local_port(port=9223)
         self.co.use_system_user_path(on_off=self.user_path_on_off)
         self.co.set_user_data_path(self.get_browser_by_user_dir_path())
