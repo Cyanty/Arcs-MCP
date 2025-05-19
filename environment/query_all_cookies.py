@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import platform
+from functools import wraps
 import psutil
 from typing import Dict, List, Tuple
 from DrissionPage._base.chromium import Chromium
@@ -9,10 +10,6 @@ from utils import logger
 
 
 def dp_instance() -> SingletonDrissionPage:
-    return SingletonDrissionPage(user_path_on_off=True)
-
-
-def dp_instance_test() -> SingletonDrissionPage:
     return SingletonDrissionPage(user_path_on_off=False)
 
 
@@ -91,7 +88,7 @@ def is_browser_open(browser_name: str):
 def check_browser_remote_debugging(browser_name: str):
     names, _ = browser_process_names(browser_name)
     for conn in psutil.net_connections():
-        if conn.status == 'LISTEN' and conn.laddr.port == 9222:
+        if conn.status == 'LISTEN' and conn.laddr.port == 9223:
             pid = conn.pid
             if pid:
                 try:
@@ -101,7 +98,7 @@ def check_browser_remote_debugging(browser_name: str):
                         return True
                 except psutil.NoSuchProcess:
                     pass
-    logger.info("❌ Browser remote debug mode is not enabled (port 9222 is not used by the browser).")
+    logger.info("❌ Browser remote debug mode is not enabled (port 9223 is not used by the browser).")
     return False
 
 
@@ -162,8 +159,7 @@ def _close_all_browsers(first_startup=False):
 
 
 def get_sync_browser_init():
-    _close_all_browsers(first_startup=True)
-    dp_instance()
+    check_browser_process_states() and dp_instance().init_browser_process()
 
 
 def get_sync_browser_destroy():
@@ -172,13 +168,10 @@ def get_sync_browser_destroy():
 
 def check_browser_process_states() -> bool:
     states = dp_instance().get_current_browser_states()
-    logger.info(f"返回浏览器是否仍可用: {states.is_alive}")
-    logger.info(f"返回浏览器是否接管的: {states.is_existed}")
-    return not states.is_alive
+    return True if states is None else not states.is_alive
 
 
 def get_browser_by_reconnect():
-    _close_all_browsers()
     dp_instance().destroy_browser_process().init_browser_process()
 
 
@@ -193,3 +186,13 @@ def get_chromium_browser_signal() -> Tuple[Chromium, ThreadPoolExecutor]:
 def browser_refresh_cookies():
     dp_instance().refresh_cookies()
 
+
+def with_browser_lifecycle(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        get_sync_browser_init()
+        try:
+            return await func(*args, **kwargs)
+        finally:
+            get_sync_browser_destroy()
+    return wrapper

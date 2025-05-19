@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from typing import Optional, Tuple, Dict
 from DrissionPage._base.chromium import Chromium
@@ -21,6 +22,7 @@ class SingletonDrissionPage:
 
     调式模式要求一个端口绑定一个用户文件目录，
     反之，默认系统用户目录不能绑定多个浏览器（默认双击打开浏览器时，再启动dp指定系统用户目录会报错）
+    谷歌浏览器136版本后不支持自动化指定默认用户目录启动
     """
     def __init__(self, user_path_on_off):
         self.user_path_on_off: bool = user_path_on_off
@@ -29,14 +31,14 @@ class SingletonDrissionPage:
         self.browser: Optional[Chromium] = None
         self.process_id: Optional[int] = None
         self._all_cookies_dicts: dict = {}
-        self.executor = ThreadPoolExecutor(max_workers=20)
-        self._init_browser()
+        self.executor = ThreadPoolExecutor(max_workers=10)
 
     def _init_browser(self) -> None:
         logger.info('<SingletonDrissionPage Class init>: Initialization Chromium Browser.')
         self.co = ChromiumOptions()
-        self.co.set_local_port(port=9222)
+        self.co.set_local_port(port=9223)
         self.co.use_system_user_path(on_off=self.user_path_on_off)
+        self.co.set_user_data_path(self.get_browser_by_user_dir_path())
         self.co.headless(on_off=self.headless)
         self.browser = Chromium(addr_or_opts=self.co)
         self.process_id = self.browser.process_id
@@ -46,7 +48,7 @@ class SingletonDrissionPage:
         logger.info('<SingletonDrissionPage Class destroy>: Destroy Chromium Browser.')
         self.co = None
         self.headless = False
-        self.browser.quit()
+        self.browser and self.browser.quit()
         self.browser = None
         self.process_id = None
 
@@ -71,7 +73,7 @@ class SingletonDrissionPage:
         return self
 
     def get_current_browser_states(self):
-        return self.browser.states
+        return self.browser and self.browser.states
 
     def get_cookies_from_chromium(self, cookies_key: str) -> Dict[str, str]:
         return self._all_cookies_dicts.get(cookies_key)
@@ -89,3 +91,8 @@ class SingletonDrissionPage:
         if len(parts) >= 2:
             return '.' + '.'.join(parts[-2:])
 
+    @staticmethod
+    def get_browser_by_user_dir_path() -> str:
+        browser_by_user_dir_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "browser_user_dir")
+        os.makedirs(browser_by_user_dir_path, exist_ok=True)
+        return browser_by_user_dir_path
