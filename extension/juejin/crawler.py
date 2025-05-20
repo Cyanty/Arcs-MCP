@@ -1,14 +1,15 @@
 import asyncio
-import pyperclip
 from typing import Dict
 from DrissionPage._functions.keys import Keys
 from base import AbstractCrawler
 from environment import get_chromium_browser_signal
+from extension.crawler_factory import get_crawler_setup_source
 from extension.juejin.client import JueJinClient
 from utils import logger, request, pyperclip_copy
 
 
 class JueJinCrawler(AbstractCrawler):
+
     def __init__(self):
         self.type_crawler = "JueJin Crawler"
         self.domain_crawler = ".juejin.cn"
@@ -82,3 +83,18 @@ class JueJinCrawler(AbstractCrawler):
         finally:
             tab.close()
 
+    async def login_as(self):
+        browser, executor = get_chromium_browser_signal()
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(executor, self.login_as_sync, browser)
+
+    def login_as_sync(self, browser):
+        tab = browser.new_tab()
+        try:
+            tab.get(self._jueJinClient.verify_login_url)
+            tab.wait.load_start()
+            get_crawler_setup_source().update({"juejin": tab.url != self._jueJinClient.login_url})
+        except Exception as e:
+            logger.error(f'[{self.type_crawler}] Login page failed to validate! Cause of error:{e}')
+        finally:
+            tab.close()

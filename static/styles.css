@@ -154,3 +154,19 @@ tr:hover {
     background-color: rgba(245, 245, 245, 0.2);
     /*color: #007BFF;*/
 }
+
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.logged-in {
+    background-color: #4CAF50; /* 绿色表示已登录 */
+}
+
+.logged-out {
+    background-color: #F44336; /* 红色表示未登录 */
+}

@@ -24,10 +24,10 @@ class SingletonDrissionPage:
     反之，默认系统用户目录不能绑定多个浏览器（默认双击打开浏览器时，再启动dp指定系统用户目录会报错）
     谷歌浏览器136版本后不支持自动化指定默认用户目录启动
     """
-    def __init__(self, user_path_on_off):
+    def __init__(self, user_path_on_off, headless_on_off):
         self.user_path_on_off: bool = user_path_on_off
         self.co: Optional[ChromiumOptions] = None
-        self.headless = False
+        self.headless_on_off = headless_on_off
         self.browser: Optional[Chromium] = None
         self.process_id: Optional[int] = None
         self._all_cookies_dicts: dict = {}
@@ -40,7 +40,7 @@ class SingletonDrissionPage:
         self.co.set_local_port(port=9223)
         self.co.use_system_user_path(on_off=self.user_path_on_off)
         self.co.set_user_data_path(self.get_browser_by_user_dir_path())
-        self.co.headless(on_off=self.headless)
+        self.co.headless(on_off=self.headless_on_off)
         self.browser = Chromium(addr_or_opts=self.co)
         self.process_id = self.browser.process_id
         self.refresh_cookies()

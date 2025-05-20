@@ -7,7 +7,7 @@
     <!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">   -->
     <meta name="description" content="index">
     <meta name="author" content="lcy">
-<!--    <link rel="icon" href="../../../../favicon.ico">-->
+    <!--    <link rel="icon" href="../../../../favicon.ico">    -->
 
     <title>Upload & Publish</title>
   </head>
@@ -17,26 +17,31 @@
     <div class="container">
         <h2>设置发布源开关</h2>
         <div id="toggleContainer">
+            <span id="csdn-status" class="status-dot"></span>
             <span class="shifted-text">CSDN</span>
             <label class="switch">
                 <input type="checkbox" id="csdn" class="toggleButton">
                 <span class="slider"></span>
             </label>
+            <span id="juejin-status" class="status-dot"></span>
             <span class="shifted-text">掘金</span>
             <label class="switch">
                 <input type="checkbox" id="juejin" class="toggleButton">
                 <span class="slider"></span>
             </label>
+            <span id="cnblogs-status" class="status-dot"></span>
             <span class="shifted-text">博客园</span>
             <label class="switch">
                 <input type="checkbox" id="cnblogs" class="toggleButton">
                 <span class="slider"></span>
             </label>
+            <span id="wechat-status" class="status-dot"></span>
             <span class="shifted-text">微信公众号</span>
             <label class="switch">
                 <input type="checkbox" id="wechat" class="toggleButton">
                 <span class="slider"></span>
             </label>
+            <span id="halo-status" class="status-dot"></span>
             <span class="shifted-text">Halo博客</span>
             <label class="switch">
                 <input type="checkbox" id="halo" class="toggleButton">
@@ -45,10 +50,11 @@
         </div>
         <hr>
 
-{#        <h2>刷新cookies按钮</h2>#}
-{#        <button id="requestButton">点击刷新cookies</button>#}
-{#        <div id="response">{{ refresh }}</div>#}
-{#        <hr>#}
+        <h2>发布浏览器操作</h2>
+        <button id="openBrowserButton">点击打开浏览器</button>
+        {# <button id="requestButton">点击刷新cookies</button> #}
+        <div id="response">{{ refresh }}</div>
+        <hr>
 
         <h1>上传发布文章文件</h1>
         <form action="/uploader/mdfile" method="POST" enctype="multipart/form-data">
@@ -97,9 +103,7 @@
     <script>
         const t_data = {{ data | tojson }};
         if (t_data.show_confirm) {
-            alert("检测到浏览器环境需要更新，需重启浏览器（默认为谷歌浏览器）。\n" +
-                "点击“确认”将立即重启浏览器。\n" +
-                "警告：重启浏览器将强制关闭所有浏览器窗口，未保存的数据可能会丢失。请确保已保存所有重要数据。");
+            alert("重启发布浏览器。点击“确认”将立即重启发布浏览器。\n");
 
             fetch('/browser/handle_confirm')
             .then(response => {
@@ -137,6 +141,14 @@
                     }
                 }
             })
+            const statuses = toggleContainer.querySelectorAll('span[class^="status-dot"]');
+            statuses.forEach((status, index) => {
+                for (const [key, value] of Object.entries(data)) {
+                    if (status.id.replace(/-status$/, "") === key) {
+                        document.getElementById(status.id).className = value ? 'status-dot logged-in' : 'status-dot logged-out';
+                    }
+                }
+            })
         }
 
         // 添加点击事件监听器
@@ -160,45 +172,39 @@
             }
         });
 
-        document.getElementById('requestButton').addEventListener('click', function() {
-            fetch('/browser/cookies/refresh')
+        document.getElementById('openBrowserButton').addEventListener('click', function() {
+            fetch('/browser/open')
                 .then(response => {
                     if (response.ok) {
-                        document.getElementById('response').innerText = "成功刷新浏览器cookies!";
+                        document.getElementById('response').innerText = "成功打开发布浏览器!";
                     } else {
-                        document.getElementById('response').innerText = "刷新浏览器cookies失败!";
+                        document.getElementById('response').innerText = "打开发布浏览器失败!";
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('response').innerText = '刷新浏览器cookies失败!';
+                    document.getElementById('response').innerText = '打开发布浏览器失败!';
                 });
-        });
+         });
+
+        {#document.getElementById('requestButton').addEventListener('click', function() {#}
+        {#    fetch('/state')#}
+        {#        .then(response => {#}
+        {#            setToggleStates(response.json());#}
+        {#            if (response.ok) {#}
+        {#                document.getElementById('response').innerText = "成功刷新浏览器cookies!";#}
+        {#            } else {#}
+        {#                document.getElementById('response').innerText = "刷新浏览器cookies失败!";#}
+        {#            }#}
+        {#        })#}
+        {#        .catch(error => {#}
+        {#            console.error('Error:', error);#}
+        {#            document.getElementById('response').innerText = '刷新浏览器cookies失败!';#}
+        {#        });#}
+        {# });#}
+
     </script>
 
-{#    <script>#}
-{#     window.difyChatbotConfig = {#}
-{#      token: '93TiklhJjTLxn1cq',#}
-{#      baseUrl: 'http://192.168.1.199'#}
-{#     }#}
-{#    </script>#}
-{#    <script#}
-{#     src="http://192.168.1.199/embed.min.js"#}
-{#     id="93TiklhJjTLxn1cq"#}
-{#     defer>#}
-{#    </script>#}
-{#    <style>#}
-{#      #dify-chatbot-bubble-button {#}
-{#        background-color: #1C64F2 !important;#}
-{#      }#}
-{#      #dify-chatbot-bubble-window {#}
-{#        width: 24rem !important;#}
-{#        height: 40rem !important;#}
-{#      }#}
-{#    </style>#}
-
-
   </body>
-
 
 </html>

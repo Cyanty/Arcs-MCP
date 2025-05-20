@@ -3,11 +3,13 @@ import datetime
 from base import AbstractCrawler
 from config import CNBLOGS_MT_KEYWORDS
 from extension.cnblogs.client import CnBlogsMetaBlogClient
+from extension.crawler_factory import get_crawler_setup_source
 from utils import logger
 from tenacity import retry, stop_after_attempt, wait_fixed, RetryError
 
 
 class CnBlogsCrawler(AbstractCrawler):
+
     def __init__(self):
         self.type_crawler = "CnBlogs Crawler"
         self.domain_crawler = ".cnblogs.com"
@@ -69,9 +71,5 @@ class CnBlogsCrawler(AbstractCrawler):
             except Exception as e:
                 logger.error(f"[{self.type_crawler}] Failed to request image link！- {e}")
 
-
-
-
-
-
-
+    async def login_as(self):
+        get_crawler_setup_source().update({"cnblogs": True})

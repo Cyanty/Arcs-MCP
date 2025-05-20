@@ -56,12 +56,10 @@ class CsdnClient(AbstractBrowserClient):
     def md_content(self, value: str):
         self._md_content = value
 
+    @property
+    def verify_login_url(self) -> str:
+        return 'https://mpbeta.csdn.net/'
 
-
-
-
-
-
-
-
-
+    @property
+    def login_url(self) -> str:
+        return 'https://passport.csdn.net/login?code=applets'

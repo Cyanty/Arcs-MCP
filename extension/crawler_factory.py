@@ -42,7 +42,7 @@ class CrawlerFactory:
                 continue
 
             self.crawler_module_extensions.update({crawler_module_name: crawler_module_class})
-            self.crawler_setup_source.update({crawler_module_name: True})
+            self.crawler_setup_source.update({crawler_module_name: False})
 
 
 def create_crawler_instance(module_name: str) -> AbstractCrawler:
@@ -54,4 +54,3 @@ def create_crawler_instance(module_name: str) -> AbstractCrawler:
 
 def get_crawler_setup_source() -> Dict[str, bool]:
     return CrawlerFactory().crawler_setup_source
-

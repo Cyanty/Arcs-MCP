@@ -9,8 +9,8 @@ from environment.dp_obj import SingletonDrissionPage
 from utils import logger
 
 
-def dp_instance() -> SingletonDrissionPage:
-    return SingletonDrissionPage(user_path_on_off=False)
+def dp_instance(user_path_on_off=False, headless_on_off=False) -> SingletonDrissionPage:
+    return SingletonDrissionPage(user_path_on_off=user_path_on_off, headless_on_off=headless_on_off)
 
 
 def browser_process_names(browser: str) -> Tuple[List[str], str]:
@@ -158,35 +158,6 @@ def _close_all_browsers(first_startup=False):
             _kill_browsers(browsers)
 
 
-def get_sync_browser_init():
-    check_browser_process_states() and dp_instance().init_browser_process()
-
-
-def get_sync_browser_destroy():
-    dp_instance().destroy_browser_process()
-
-
-def check_browser_process_states() -> bool:
-    states = dp_instance().get_current_browser_states()
-    return True if states is None else not states.is_alive
-
-
-def get_browser_by_reconnect():
-    dp_instance().destroy_browser_process().init_browser_process()
-
-
-def get_cookies_from_chromium(cookies_key: str) -> Dict[str, str]:
-    return dp_instance().get_cookies_from_chromium(cookies_key)
-
-
-def get_chromium_browser_signal() -> Tuple[Chromium, ThreadPoolExecutor]:
-    return dp_instance().get_chromium_browser_signal()
-
-
-def browser_refresh_cookies():
-    dp_instance().refresh_cookies()
-
-
 def with_browser_lifecycle(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
@@ -196,3 +167,29 @@ def with_browser_lifecycle(func):
         finally:
             get_sync_browser_destroy()
     return wrapper
+
+
+def check_browser_process_states() -> bool:
+    states = dp_instance().get_current_browser_states()
+    return True if states is None else not states.is_alive
+
+
+def get_sync_browser_init():
+    return check_browser_process_states() and dp_instance().init_browser_process()
+
+
+def get_sync_browser_destroy():
+    dp_instance().destroy_browser_process()
+
+
+def get_browser_by_reconnect():
+    dp_instance().destroy_browser_process().init_browser_process()
+
+
+def get_chromium_browser_signal() -> Tuple[Chromium, ThreadPoolExecutor]:
+    return dp_instance().get_chromium_browser_signal()
+
+
+def get_cookies_from_chromium(cookies_key: str) -> Dict[str, str]:
+    dp_instance().refresh_cookies()
+    return dp_instance().get_cookies_from_chromium(cookies_key)

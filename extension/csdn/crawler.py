@@ -5,11 +5,13 @@ from DrissionPage._functions.keys import Keys
 from base import AbstractCrawler
 from config import CSDN_LOC_TAG
 from environment import get_chromium_browser_signal
+from extension.crawler_factory import get_crawler_setup_source
 from extension.csdn.client import CsdnClient
 from utils import logger, github_proxy_url
 
 
 class CsdnCrawler(AbstractCrawler):
+
     def __init__(self):
         self.type_crawler = "CSDN Crawler"
         self.domain_crawler = ".csdn.net"
@@ -54,7 +56,20 @@ class CsdnCrawler(AbstractCrawler):
         finally:
             tab.close()
 
+    async def login_as(self):
+        browser, executor = get_chromium_browser_signal()
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(executor, self.login_as_sync, browser)
 
-
+    def login_as_sync(self, browser):
+        tab = browser.new_tab()
+        try:
+            tab.get(self._csdnClient.verify_login_url)
+            tab.wait.load_start()
+            get_crawler_setup_source().update({"csdn": tab.url != self._csdnClient.login_url})
+        except Exception as e:
+            logger.error(f'[{self.type_crawler}] Login page failed to validate! Cause of error:{e}')
+        finally:
+            tab.close()
 
 

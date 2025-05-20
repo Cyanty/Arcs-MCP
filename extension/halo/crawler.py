@@ -2,11 +2,13 @@ import asyncio
 from typing import Dict
 import markdown2
 from base import AbstractCrawler
+from extension.crawler_factory import get_crawler_setup_source
 from extension.halo.client import HaloClient
 from utils import *
 
 
 class HaloCrawler(AbstractCrawler):
+
     def __init__(self):
         self.type_crawler = "Halo Crawler"
         self.domain_crawler = "192.168.1.189"
@@ -87,3 +89,5 @@ class HaloCrawler(AbstractCrawler):
             if 200 <= status_code < 300:
                 return {"old_image_url": image_result["image_url"], "new_image_url": "/upload/" + image_filename}
 
+    async def login_as(self):
+        get_crawler_setup_source().update({"halo": False})

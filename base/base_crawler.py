@@ -32,6 +32,10 @@ class AbstractCrawler(ABC):
     async def run(self):
         pass
 
+    @abstractmethod
+    async def login_as(self):
+        pass
+
 
 class AbstractClient(ABC):
     @property
@@ -86,7 +90,12 @@ class AbstractBrowserClient(ABC):
     def md_content(self):  # 文章内容
         ...
 
+    @property
+    @abstractmethod
+    def verify_login_url(self) -> str:
+        ...
 
-
-
-
+    @property
+    @abstractmethod
+    def login_url(self) -> str:
+        ...

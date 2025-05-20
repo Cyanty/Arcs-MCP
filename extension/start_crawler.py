@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 from base import AbstractCrawler
+from environment import with_browser_lifecycle
 from extension.crawler_factory import get_crawler_setup_source, create_crawler_instance
 from functools import wraps
 from utils import logger, image_request
@@ -22,6 +23,7 @@ def config_feature(model_name: str):
     return decorator
 
 
+@with_browser_lifecycle
 async def crawlers_start(file_name: str, md_content: str):
     file_name = file_name.rsplit('.', 1)[0]
     logger.info(f"----- Enable publishing the article -> {file_name} -----")
@@ -46,3 +48,16 @@ async def crawlers_start(file_name: str, md_content: str):
     return result_dict
 
 
+@with_browser_lifecycle
+async def crawler_verify_login():
+    tasks = []
+    for model_name in get_crawler_setup_source().keys():
+        crawler_object = create_crawler_instance(model_name)
+
+        async def start(crawler_class: AbstractCrawler):
+            await crawler_class.login_as()
+
+        tasks.append(start(crawler_object))
+    await asyncio.gather(*tasks)
+
+    return get_crawler_setup_source()

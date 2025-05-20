@@ -4,18 +4,19 @@ import json
 import logging
 import re
 from typing import Optional, List, Dict, Any
-import markdown2
 from DrissionPage._functions.keys import Keys
 from DrissionPage._pages.mix_tab import MixTab
 from base import AbstractCrawler
 from config import WECHAT_PUBLIC_ACCOUNT, WECHAT_AUTHOR, WECHAT_MARKDOWN2HTML
 from environment import get_chromium_browser_signal
+from extension.crawler_factory import get_crawler_setup_source
 from extension.wechat.client import WeChatClient
 
 from utils import request, logger, pyperclip_paste
 
 
 class WeChatCrawler(AbstractCrawler):
+
     def __init__(self):
         self.type_crawler = "WeChat Crawler"
         self.domain_crawler = ".weixin.qq.com"
@@ -115,5 +116,12 @@ class WeChatCrawler(AbstractCrawler):
         finally:
             tab.close()
 
-
-
+    async def login_as(self):
+        try:
+            status_code, access_token_json = await request(method="POST",
+                                                           url="https://api.weixin.qq.com/cgi-bin/stable_token",
+                                                           json_data=WECHAT_PUBLIC_ACCOUNT,
+                                                           timeout=10)
+            get_crawler_setup_source().update({"wechat": "access_token" in access_token_json})
+        except Exception as e:
+            logger.error(f'[{self.type_crawler}] Failure to login as the account! Cause of error:{e}')

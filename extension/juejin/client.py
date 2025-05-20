@@ -167,6 +167,10 @@ class JueJinClient(AbstractClient, AbstractBrowserClient):
     def md_content(self, value: str):
         self._md_content = value
 
+    @property
+    def verify_login_url(self) -> str:
+        return 'https://juejin.cn/creator/home'
 
-
-
+    @property
+    def login_url(self) -> str:
+        return 'https://juejin.cn/'
