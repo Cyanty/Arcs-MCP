@@ -20,6 +20,7 @@ class HaloClient(AbstractClient):
         self._cookies = None
         self._publish_url = None
         self._json_data = None
+        self._token = HALO_PUBLISH_TOKEN
 
     @property
     def host(self):
@@ -28,6 +29,10 @@ class HaloClient(AbstractClient):
     @host.setter
     def host(self, value: str):
         self._host = value
+
+    @property
+    def token(self):
+        return self._token
 
     @property
     def attachment_publish_url(self) -> str:
@@ -59,7 +64,7 @@ class HaloClient(AbstractClient):
             'Accept': '*/*',
             'Accept-Language': 'zh-CN,zh;q=0.9',
             'Connection': 'keep-alive',
-            'Authorization': 'Bearer ' + HALO_PUBLISH_TOKEN,
+            'Authorization': 'Bearer ' + self._token,
             # 'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary26w5KbBsjd2c3EwK',
             'Origin': 'http://' + self.host,
             'Referer': 'http://' + self.host + '/console/attachments',
@@ -72,7 +77,7 @@ class HaloClient(AbstractClient):
             'Accept': 'application/json, text/plain, */*',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
             'Connection': 'keep-alive',
-            'Authorization': 'Bearer ' + HALO_PUBLISH_TOKEN,
+            'Authorization': 'Bearer ' + self._token,
             'Content-Type': 'application/json',
             'Origin': 'http://' + self.host,
             'Referer': 'http://' + self.host + '/console/posts/editor',

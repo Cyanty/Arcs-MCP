@@ -1,9 +1,9 @@
 import asyncio
 import re
+from typing import Dict, Optional
 from pypinyin import pinyin, lazy_pinyin, Style
 from datetime import datetime
 import uuid
-
 from utils import request_img
 
 
@@ -42,3 +42,11 @@ async def image_request(md_content: str):
         if 200 <= status_code < 300
     ]
     return image_results
+
+
+def check_dict_base_config(base_config: Dict[str, Optional[str]]):
+    for key in base_config:
+        value = base_config.get(key)
+        if value is None or (isinstance(value, str) and len(value.strip()) == 0):
+            return None
+    return base_config

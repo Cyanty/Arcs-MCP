@@ -14,7 +14,6 @@ class CnBlogsCrawler(AbstractCrawler):
         self.type_crawler = "CnBlogs Crawler"
         self.domain_crawler = ".cnblogs.com"
         self._cnBlogsMetaBlogClient = CnBlogsMetaBlogClient()
-        self._cnBlogsMetaBlogClient.read_config()
         self.post_data = None
 
     async def article_path_proc(self, file_name: str, md_content: str):
@@ -72,4 +71,4 @@ class CnBlogsCrawler(AbstractCrawler):
                 logger.error(f"[{self.type_crawler}] Failed to request image link！- {e}")
 
     async def login_as(self):
-        get_crawler_setup_source().update({"cnblogs": True})
+        get_crawler_setup_source().update({"cnblogs": self._cnBlogsMetaBlogClient.config is not None})

@@ -1,10 +1,11 @@
 import asyncio
+import re
 from typing import Dict
 import markdown2
 from base import AbstractCrawler
 from extension.crawler_factory import get_crawler_setup_source
 from extension.halo.client import HaloClient
-from utils import *
+from utils import generate_uuid, convert_to_slug, get_current_time, request, request_test, logger
 
 
 class HaloCrawler(AbstractCrawler):
@@ -50,7 +51,7 @@ class HaloCrawler(AbstractCrawler):
                                      timeout=10
                                      )
         if not (200 <= code < 300):
-            logging.error(f'[{self.type_crawler}] Failure to publish the article! Cause of error: Http Response Code -> {result}')
+            logger.error(f'[{self.type_crawler}] Failure to publish the article! Cause of error: Http Response Code -> {result}')
             return {'result': AbstractCrawler.FAILURE_RESULT}
         # code, result = await request(method="PUT",
         #                              url=self._haloClient.publish_url + '/publish',
@@ -90,4 +91,11 @@ class HaloCrawler(AbstractCrawler):
                 return {"old_image_url": image_result["image_url"], "new_image_url": "/upload/" + image_filename}
 
     async def login_as(self):
-        get_crawler_setup_source().update({"halo": False})
+        get_crawler_setup_source().update({"halo": await self.check_connection_availability()})
+
+    async def check_connection_availability(self):
+        try:
+            status_code, response_json = await request_test(method="GET", url='http://' + self.domain_crawler, timeout=2)
+            return status_code == 200 and self._haloClient.token is not None
+        except Exception as e:
+            return False

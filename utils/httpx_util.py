@@ -49,3 +49,11 @@ async def request_img(method: str,
         except Exception as e:
             raise FetchRequestError(f"{e}, {response.text} -> {response.status_code}")
 
+
+async def request_test(method: str, url: str, timeout: int = 10, **kwargs) -> Tuple[int, dict]:
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.request(method, url, timeout=timeout, **kwargs)
+            return response.status_code, response.json()
+        except Exception as e:
+            raise FetchRequestError(f"{e}, {response.text} -> {response.status_code}")

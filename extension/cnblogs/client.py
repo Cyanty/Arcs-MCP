@@ -2,7 +2,7 @@
 # !/bin/sh python3
 import xmlrpc.client as xmlrpclib
 from config import CNBLOGS_METABLOG_CONFIG
-from utils import logger
+from utils import logger, check_dict_base_config
 
 
 class CnBlogsMetaBlogClient:
@@ -22,16 +22,21 @@ class CnBlogsMetaBlogClient:
         self._config = None
         self._server = None
         self._mwb = None
+        self.read_config()
 
     def read_config(self):
         """ 读取配置 """
         try:
-            self._config = CNBLOGS_METABLOG_CONFIG
+            self._config = check_dict_base_config(CNBLOGS_METABLOG_CONFIG)
             self._server = xmlrpclib.ServerProxy(CNBLOGS_METABLOG_CONFIG["url"])
             self._mwb = self._server.metaWeblog
             self._config["blogid"] = self.get_users_blogs()[0]["blogid"]
         except Exception as e:
-            logger.error(f"cnblogs metablog config 发生错误！- {e}")
+            logger.error(f"cnblogs metablog config initialization error！- {e}")
+
+    @property
+    def config(self):
+        return self._config
 
     def get_users_blogs(self):
         """ 获取博客信息 @return: { string blogid, string url, string blogName } """
