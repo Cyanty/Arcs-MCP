@@ -67,6 +67,11 @@ class AbstractClient(ABC):
 class AbstractBrowserClient(ABC):
     @property
     @abstractmethod
+    def edit_url(self) -> str:
+        ...
+
+    @property
+    @abstractmethod
     def loc_title(self):  # 标题
         ...
 

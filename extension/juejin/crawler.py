@@ -67,7 +67,7 @@ class JueJinCrawler(AbstractCrawler):
     def tab_publish_actions(self, browser) -> Dict:
         tab = browser.new_tab()
         try:
-            tab.get('https://juejin.cn/editor/drafts/' + self._jueJinClient.host)
+            tab.get(self._jueJinClient.edit_url + self._jueJinClient.host)
             copy_adapt = lambda: tab.actions \
                 .click(on_ele=tab.ele(self._jueJinClient.loc_content)).type(Keys.CTRL_V).wait(0.25)
             pyperclip_copy(self._jueJinClient.md_content, post_action=copy_adapt)

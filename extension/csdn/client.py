@@ -9,6 +9,10 @@ class CsdnClient(AbstractBrowserClient):
         self._md_content = None
 
     @property
+    def edit_url(self) -> str:
+        return 'https://editor.csdn.net/md/'  # "https://mp.csdn.net/mp_blog/creation/editor"
+
+    @property
     def loc_title(self):  # 标题
         return By.XPATH, '//div[contains(@class,"article-bar")]//input[contains(@placeholder,"请输入文章标题")]'
 

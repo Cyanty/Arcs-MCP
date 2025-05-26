@@ -34,7 +34,7 @@ class WeChatCrawler(AbstractCrawler):
                 'DIGEST': None,
                 'CONTENT': html_content,
                 'CONTENT_SOURCE_URL': None,
-                'THUMB_MEDIA_ID': "oL0UpGlBxdUv4oNzDuNmlBA_vUPdtm__P2wPG0TkzmKKXSKy1gGuwn3FZG640iZf",  # 文章封面（必须为永久素材id）
+                'THUMB_MEDIA_ID': "oL0UpGlBxdUv4oNzDuNmlLL589hRm8DTi6J9XQ3dUTOYej1alRrHqa0qE8mTPEcP",  # 文章封面（必须为永久素材id）
                 'X1_Y1_X2_Y2': None,
             }
 

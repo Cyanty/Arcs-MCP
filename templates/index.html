@@ -41,6 +41,12 @@
                 <input type="checkbox" id="wechat" class="toggleButton">
                 <span class="slider"></span>
             </label>
+            <span id="zhihu-status" class="status-dot"></span>
+            <span class="shifted-text">知乎</span>
+            <label class="switch">
+                <input type="checkbox" id="zhihu" class="toggleButton">
+                <span class="slider"></span>
+            </label>
             <span id="halo-status" class="status-dot"></span>
             <span class="shifted-text">Halo博客</span>
             <label class="switch">
@@ -51,8 +57,10 @@
         <hr>
 
         <h2>发布浏览器操作</h2>
-        <button id="openBrowserButton">点击打开浏览器</button>
-        {# <button id="requestButton">点击刷新cookies</button> #}
+        <div style="display: flex; gap: 40px;">
+            <button id="openBrowserButton">点击打开浏览器</button>
+            <button id="refreshBtn">刷新浏览器登录状态</button>
+        </div>
         <div id="response">{{ refresh }}</div>
         <hr>
 
@@ -92,6 +100,10 @@
                 <td class="result">{{ data.result_dict.wechat.result }}</td>
             </tr>
             <tr>
+                <td>知乎</td>
+                <td class="result">{{ data.result_dict.zhihu.result }}</td>
+            </tr>
+            <tr>
                 <td>Halo博客</td>
                 <td class="result">{{ data.result_dict.halo.result }}</td>
             </tr>
@@ -120,16 +132,6 @@
         }
 
         const toggleContainer = document.getElementById('toggleContainer');
-
-        window.onload = function() {
-            // 调用 /state 接口
-            fetch('/state')
-                .then(response => response.json())
-                .then(data => {
-                    setToggleStates(data);
-                })
-                .catch(error => console.error('Error:', error));
-        };
 
          // 根据 JSON 数据设置开关状态的函数
         function setToggleStates(data) {
@@ -186,6 +188,24 @@
                     document.getElementById('response').innerText = '打开发布浏览器失败!';
                 });
          });
+
+         document.getElementById("refreshBtn").addEventListener('click', function() {
+             this.disabled = true; // 禁用按钮防止重复点击
+             // 调用 /state 接口
+             fetch('/state')
+                 .then(response => {
+                     if (response.ok) {
+                         document.getElementById('response').innerText = "成功刷新浏览器登录状态!";
+                     } else {
+                         document.getElementById('response').innerText = "刷新浏览器登录状态失败!";
+                     }
+                     return response.json();
+                 })
+                 .then(data => {
+                     setToggleStates(data);
+                 })
+                 .catch(error => console.error('Error:', error));
+        });
 
         {#document.getElementById('requestButton').addEventListener('click', function() {#}
         {#    fetch('/state')#}

@@ -16,6 +16,10 @@ class JueJinClient(AbstractClient, AbstractBrowserClient):
         self._host = None
 
     @property
+    def edit_url(self) -> str:
+        return "https://juejin.cn/editor/drafts/"
+
+    @property
     def host(self):
         return self._host
 
