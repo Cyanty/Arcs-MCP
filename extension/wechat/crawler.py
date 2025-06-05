@@ -7,7 +7,7 @@ from typing import Optional, List, Dict, Any
 from DrissionPage._functions.keys import Keys
 from DrissionPage._pages.mix_tab import MixTab
 from base import AbstractCrawler
-from config import WECHAT_PUBLIC_ACCOUNT, WECHAT_AUTHOR, WECHAT_MARKDOWN2HTML
+from config import WECHAT_PUBLIC_ACCOUNT, WECHAT_AUTHOR, WECHAT_MARKDOWN2HTML, WECHAT_ARTICLE_PUBLISH_MODE
 from environment import get_chromium_browser_signal
 from extension.crawler_factory import get_crawler_setup_source
 from extension.wechat.client import WeChatClient
@@ -51,27 +51,44 @@ class WeChatCrawler(AbstractCrawler):
                 if image_path and "old_image_url" in image_path and "new_image_url" in image_path:
                     md_content = md_content.replace(image_path["old_image_url"], image_path["new_image_url"])
         self._weChatClient.pre_json_data = await self.article_path_proc(file_name, md_content)
+
+    async def run(self):
+        logger.info(f'[{self.type_crawler}] Start publishing articles.')
         json_data = json.dumps(self._weChatClient.pre_json_data, ensure_ascii=False).encode('utf-8')
-        status_code, media_id_json = await request("POST",
+        status_code, result_json = await request("POST",
                                                    url=self._weChatClient.pre_publish_url,
                                                    content=json_data,
                                                    headers=self._weChatClient.headers,
                                                    timeout=10)
         if 200 <= status_code < 300:
-            self._weChatClient.json_data = media_id_json["media_id"]
+            self._weChatClient.json_data = result_json["media_id"]
+            self._weChatClient.mp_json_data = result_json["media_id"]
 
-    async def run(self):
-        logger.info(f'[{self.type_crawler}] Start publishing articles.')
-        status_code, result_json = await request("POST",
-                                                 url=self._weChatClient.publish_url,
-                                                 json_data=self._weChatClient.json_data,
-                                                 headers=self._weChatClient.headers,
-                                                 timeout=10)
-        if 200 <= status_code < 300 and result_json.get("errmsg") == "ok":
+        if WECHAT_ARTICLE_PUBLISH_MODE == "1":
+            if 200 <= status_code < 300 and result_json["media_id"] is not None:
+                return {'result': AbstractCrawler.SUCCESS_RESULT}
+            else:
+                logging.error(f"[{self.type_crawler}] Failure to pre-publish the article! Cause of error:{str(result_json)}")
+                return {'result': AbstractCrawler.FAILURE_RESULT}
+
+        if WECHAT_ARTICLE_PUBLISH_MODE == "2":
+            status_code, result_json = await self.request_post(self._weChatClient.publish_url, self._weChatClient.json_data)
+
+        if WECHAT_ARTICLE_PUBLISH_MODE == "3":
+            status_code, result_json = await self.request_post(self._weChatClient.mp_publish_url, self._weChatClient.mp_json_data)
+
+        if 200 <= status_code < 300 and result_json.get("errcode") == 0:
             return {'result': AbstractCrawler.SUCCESS_RESULT}
         else:
             logging.error(f"[{self.type_crawler}] Failure to publish the article! Cause of error:{str(result_json)}")
             return {'result': AbstractCrawler.FAILURE_RESULT}
+
+    async def request_post(self, url_type: str, json_data_type: Optional[Dict]):
+        return await request("POST",
+                             url=url_type,
+                             json_data=json_data_type,
+                             headers=self._weChatClient.headers,
+                             timeout=10)
 
     async def image_process(self, image_results):
         if image_results:
