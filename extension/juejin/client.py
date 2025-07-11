@@ -1,19 +1,51 @@
+from dataclasses import dataclass
+from typing import Annotated, Dict, Any
 from config import JUEJIN_CATEGORY_ID, JUEJIN_TAG_IDS
 from environment import get_cookies_from_chromium
 from DrissionPage._functions.by import By
 from base import AbstractClient, AbstractBrowserClient
+from utils.field_metadata_util import Description, ExampleValue
 
 
+@dataclass
 class JueJinClient(AbstractClient, AbstractBrowserClient):
 
-    def __init__(self):
-        self._md_content = None
-        self._title_name = None
-        self._create_json_data = None
-        self._pre_json_data = None
-        self._json_data = None
-        self._cookies = None
-        self._host = None
+    _title_name: Annotated[
+        str,
+        Description("juejin 发布文章标题"),
+        ExampleValue("JUEJIN 测试发布文章标题")
+    ] = None
+
+    _md_content: Annotated[
+        str,
+        Description("juejin 发布文章内容"),
+        ExampleValue("JUEJIN 测试发布文章内容 ...")
+    ] = None
+
+    _create_json_data: Annotated[
+        Dict[str, Any],
+        Description("juejin 创建文章API请求json data格式")
+    ] = None
+
+    _pre_json_data: Annotated[
+        Dict[str, Any],
+        Description("juejin 更新文章API请求json data格式")
+    ] = None
+
+    _json_data: Annotated[
+        Dict[str, Any],
+        Description("juejin 发布文章API请求json data格式")
+    ] = None
+
+    _cookies: Annotated[
+        Dict[str, str],
+        Description("juejin 浏览器cookies")
+    ] = None
+
+    _host: Annotated[
+        str,
+        Description("juejin 发布文章id")
+    ] = None
 
     @property
     def edit_url(self) -> str:

@@ -1,16 +1,35 @@
+from dataclasses import dataclass
+from typing import Annotated, Dict, Any
 from DrissionPage._functions.by import By
 from base import AbstractClient
+from utils.field_metadata_util import Description, ExampleValue
 
 
+@dataclass
 class WeChatClient(AbstractClient):
     """
     微信公众号开发者API文档：https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Access_Overview.html
     """
-    def __init__(self):
-        self._access_token = None
-        self._pre_json_data = None
-        self._json_data = None
-        self._mp_json_data = None
+    _access_token: Annotated[
+        str,
+        Description("wechat access token（默认每次请求时获取）"),
+        ExampleValue("Ad4fgK1ef6c20dff4b")
+    ] = None
+
+    _pre_json_data: Annotated[
+        Dict[str, Any],
+        Description("wechat 发布草稿API请求json data格式")
+    ] = None
+
+    _json_data: Annotated[
+        Dict[str, Any],
+        Description("wechat 发布文章API请求json data格式（25年7月后即将作废）")
+    ] = None
+
+    _mp_json_data: Annotated[
+        Dict[str, Any],
+        Description("wechat 群发文章API请求json data格式（需开启微信认证）")
+    ] = None
 
     @property
     def access_token(self):

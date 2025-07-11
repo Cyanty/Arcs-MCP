@@ -1,12 +1,24 @@
+from dataclasses import dataclass
+from typing import Annotated
 from DrissionPage._functions.by import By
 from base import AbstractBrowserClient
+from utils.field_metadata_util import Description, ExampleValue
 
 
+@dataclass
 class CsdnClient(AbstractBrowserClient):
 
-    def __init__(self):
-        self._title_name = None
-        self._md_content = None
+    _title_name: Annotated[
+        str,
+        Description("csdn 发布文章标题"),
+        ExampleValue("CSDN 测试发布文章标题")
+    ] = None
+
+    _md_content: Annotated[
+        str,
+        Description("csdn 发布文章内容"),
+        ExampleValue("CSDN 测试发布文章内容 ...")
+    ] = None
 
     @property
     def edit_url(self) -> str:

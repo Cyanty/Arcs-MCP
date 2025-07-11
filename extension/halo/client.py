@@ -1,26 +1,49 @@
+from dataclasses import dataclass
+from typing import Annotated, Dict, Any
 from base import AbstractClient
 from config import HALO_PUBLISH_TOKEN
 from environment import get_cookies_from_chromium
+from utils.field_metadata_util import Description, ExampleValue
 
 
+@dataclass
 class HaloClient(AbstractClient):
+    """ Halo发布参数说明：
+        _host: str = None, 主机IP或域名
+        _attachment_publish_url: str = None, 附件API
+        _pre_publish_url: str = None, 创建并发布API
+        _publish_url: str = None, 发布API
+        _cookies: Dict = None, cookies
+        _attachment_headers: Dict = None, 附件请求头
+        _headers: Dict = None, 发布请求头
+        _json_data: Dict = None, 发布请求data
     """
-        _host: str = None,  主机IP或域名
-        _attachment_publish_url: str = None,  附件API
-        _pre_publish_url: str = None,  创建并发布API
-        _publish_url: str = None,  发布API
-        _cookies: Dict = None,  cookies
-        _attachment_headers: Dict = None,  附件请求头
-        _headers: Dict = None,  发布请求头
-        _json_data: Dict = None,  发布请求data
-    """
+    _host: Annotated[
+        str,
+        Description("Halo主机IP或域名"),
+        ExampleValue("192.168.1.189"),
+    ] = None
 
-    def __init__(self):
-        self._host = None
-        self._cookies = None
-        self._publish_url = None
-        self._json_data = None
-        self._token = HALO_PUBLISH_TOKEN
+    _cookies: Annotated[
+        Dict[str, str],
+        Description("Halo服务浏览器cookies")
+    ] = None
+
+    _publish_url: Annotated[
+        str,
+        Description("Halo发布文章API"),
+        ExampleValue("http://192.168.1.189/apis/api.console.halo.run/v1alpha1/posts/<uuid>")
+    ] = None
+
+    _json_data: Annotated[
+        Dict[str, Any],
+        Description("Halo发布文章API请求json data格式")
+    ] = None
+
+    _token: Annotated[
+        str,
+        Description("Halo发布文章API的token")
+    ] = HALO_PUBLISH_TOKEN
 
     @property
     def host(self):
@@ -137,4 +160,3 @@ class HaloClient(AbstractClient):
 
 # client = HaloClient()  # 打印类信息
 # print(dir(client))
-
