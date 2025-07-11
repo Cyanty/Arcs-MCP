@@ -3,12 +3,12 @@
 __author__ = 'cyanty'
 
 
-def main(host, port):
+def main():
     from web.app import app
+    from config import WEB_SERVER_HOST, WEB_SERVER_PORT
     import uvicorn
-    uvicorn.run(app, host=host, port=port)
+    uvicorn.run(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
 
 
 if __name__ == '__main__':
-    main(host="127.0.0.1", port=8000)
-
+    main()

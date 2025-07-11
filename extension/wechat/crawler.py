@@ -7,7 +7,8 @@ from typing import Optional, List, Dict, Any
 from DrissionPage._functions.keys import Keys
 from DrissionPage._pages.mix_tab import MixTab
 from base import AbstractCrawler
-from config import WECHAT_PUBLIC_ACCOUNT, WECHAT_AUTHOR, WECHAT_MARKDOWN2HTML, WECHAT_ARTICLE_PUBLISH_MODE
+from config import WECHAT_PUBLIC_ACCOUNT, WECHAT_AUTHOR, WECHAT_MARKDOWN2HTML, WECHAT_ARTICLE_PUBLISH_MODE, \
+    WECHAT_COVER_IMAGE
 from environment import get_chromium_browser_signal
 from extension.crawler_factory import get_crawler_setup_source
 from extension.wechat.client import WeChatClient
@@ -34,7 +35,7 @@ class WeChatCrawler(AbstractCrawler):
                 'DIGEST': None,
                 'CONTENT': html_content,
                 'CONTENT_SOURCE_URL': None,
-                'THUMB_MEDIA_ID': "oL0UpGlBxdUv4oNzDuNmlLL589hRm8DTi6J9XQ3dUTOYej1alRrHqa0qE8mTPEcP",  # 文章封面（必须为永久素材id）
+                'THUMB_MEDIA_ID': WECHAT_COVER_IMAGE,  # 文章封面（必须为永久素材id）
                 'X1_Y1_X2_Y2': None,
             }
 

@@ -1,5 +1,11 @@
 import os
 
+
+# WEB环境变量配置
+WEB_SERVER_HOST = os.getenv("WEB_SERVER_HOST", default="127.0.0.1")
+WEB_SERVER_PORT = int(os.getenv("WEB_SERVER_PORT", default=8001))
+
+
 """
 各平台账号秘钥的配置格式：
 
@@ -49,6 +55,3 @@ SPARKAI_APP_ID = os.getenv("SPARKAI_APP_ID")
 SPARKAI_API_SECRET = os.getenv("SPARKAI_API_SECRET")
 SPARKAI_API_KEY = os.getenv("SPARKAI_API_KEY")
 SPARKAI_DOMAIN = os.getenv("SPARKAI_DOMAIN")
-
-
-
