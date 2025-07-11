@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from contextlib import asynccontextmanager
+import contextlib
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -8,18 +8,22 @@ from fastapi.responses import HTMLResponse
 from environment import get_sync_browser_destroy
 from extension.crawler_factory import get_crawler_setup_source
 from utils import logger, load_single_router_from_source
+from web.llm.mcp import submit
 from web.schemas.home import HomePageData
 
 
-@asynccontextmanager
+@contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    app_startup()   # 启动前执行的逻辑
-    yield
-    app_shutdown()  # 关闭前执行的逻辑
-
+    app_startup()
+    async with contextlib.AsyncExitStack() as stack:
+        await stack.enter_async_context(submit.mcp.session_manager.run())
+        yield
+    app_shutdown()
 
 app = FastAPI(lifespan=lifespan)
 
+# 使用 http://127.0.0.1:8001/submit/mcp 连接 mcp server
+app.mount("/submit", submit.mcp.streamable_http_app())
 # 挂载静态文件
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")),
           name="static")
@@ -63,4 +67,3 @@ def router_module_init():
         module = load_single_router_from_source(module_name=f"web.routers.{router_module_name}")
         if hasattr(module, "router"):
             app.include_router(module.router)
-

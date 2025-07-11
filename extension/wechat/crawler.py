@@ -139,7 +139,7 @@ class WeChatCrawler(AbstractCrawler):
             status_code, access_token_json = await request(method="POST",
                                                            url="https://api.weixin.qq.com/cgi-bin/stable_token",
                                                            json_data=WECHAT_PUBLIC_ACCOUNT,
-                                                           timeout=10)
+                                                           timeout=3)
             get_crawler_setup_source().update({"wechat": "access_token" in access_token_json})
         except Exception as e:
             logger.error(f'[{self.type_crawler}] Failure to login as the account! Cause of error:{e}')
