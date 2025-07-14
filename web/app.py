@@ -35,7 +35,7 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.dirna
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     home_page_data = HomePageData(result_dict={source: {'result': '还没有要发布文章~'} for source in get_crawler_setup_source()})
-    return templates.TemplateResponse("index.html", {"request": request, "data": home_page_data.dict()})
+    return templates.TemplateResponse("index.html", {"request": request, "data": home_page_data.model_dump()})
 
 
 def app_startup():

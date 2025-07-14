@@ -54,3 +54,8 @@ def create_crawler_instance(module_name: str) -> AbstractCrawler:
 
 def get_crawler_setup_source() -> Dict[str, bool]:
     return CrawlerFactory().crawler_setup_source
+
+def get_crawler_reset_source() -> Dict[str, bool]:
+    for key in get_crawler_setup_source():
+        get_crawler_setup_source()[key] = False
+    return get_crawler_setup_source()

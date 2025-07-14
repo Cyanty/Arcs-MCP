@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'cyanty'
+__author__ = 'Cyanty'
 
 
 def main():

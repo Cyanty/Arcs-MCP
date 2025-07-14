@@ -17,4 +17,4 @@ async def create_upload_file(request: Request, file: UploadFile = File(...)):
     contents = await file.read()
     result_dict = await crawlers_start(file_name=file.filename, md_content=contents.decode("utf-8"))
     home_page_data = HomePageData(result_dict=result_dict)
-    return templates.TemplateResponse("index.html", {"request": request, "data": home_page_data.dict()})
+    return templates.TemplateResponse("index.html", {"request": request, "data": home_page_data.model_dump()})

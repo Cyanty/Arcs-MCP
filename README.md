@@ -1,6 +1,10 @@
-# 一个一文多发的发布小工具
 
-一个一文多发的发布小工具，作为练手的项目。
+
+一个支持多平台的一键式文章发布工具（支持 MCP）。
+
+A multi-platform one-click article publishing tool (supports MCP).
+
+
 
 ## 概述：
 
