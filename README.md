@@ -1,65 +1,170 @@
 
 
-一个支持多平台的一键式文章发布工具（支持 MCP）。
-
-A multi-platform one-click article publishing tool (supports MCP).
-
-
+# 支持MCP服务的多平台一键发布工具
 
 ## 概述：
 
-如果有将文章分享到多个平台的需求，可以借助程序来简化这一过程，节省时间并提高效率。 
+如果有将文章分享发布到多个平台的需求，可以借助这个工具来简化这一流程。该发布工具支持MCP服务，可以让用户使用自然语言处理并实现文章在多个平台的一键式发布。
 
-## 实现思路：
+用户可以描述他们想要实现的效果，例如，“将这篇文章发布到CSDN上。”——工具会自动将文章发布到指定的发布源平台上。
 
-大多数平台支持markdown格式的文本内容，将.md文件作为入口文件读取，发布到各个平台；
+## 前置条件
 
-- 由于markdown格式的图片为本地/外链地址，为统一路径且支持平台获取图片，需将本地文章的图片地址设置为图床的外链地址；
-- 程序会将外链图片地址转成对应的平台图片地址，避免图床图片链接的不稳定和不必要的流量消耗；
+- 兼容 MCP 的 AI 客户端：Claude 桌面版、Gemini CLI、Cherry Studio 或其他 MCP 客户端。
+- uv：一个现代的 Python 包安装器和解析器。
 
-发布方式主要使用：平台提供支持的开放API、浏览器自动化模拟发布操作、平台发布接口的请求；
+## 安装与配置
 
-- 由于部分平台涉及加密参数/csrf防御认证等反爬手段，导致功能不稳定及难以维护，如平台涉及请求参数认证，尽量使用自动化的方式实现发布；
-- 自动化发布默认使用谷歌浏览器，使用dp读取本地浏览器用户文件信息，运行程序前需关闭已经运行的本地浏览器，否则会造成冲突；
+### 1. 安装 uv 环境
 
-使用python语言实现，异步方式进行多平台的文章发布，可以节省发布的时间，用AI辅助写了一个简单的前端页面，通过页面操作上传本地md格式文件的方式实现文章发布。
+这里推荐使用 [Cherry Studio](https://docs.cherry-ai.com/advanced-basic/mcp) 客户端来配置该工具的MCP服务，操作和环境配置会更加友好。Cherry Studio 还自带了 uv 环境的部署功能，用户可以一键完成安装。
 
-## 各平台发布方式：
+**Tips**：Cherry Studio 目前只使用内置的 [uv](https://github.com/astral-sh/uv) 和 [bun](https://github.com/oven-sh/bun)，**不会复用**系统中已经安装的 uv 和 bun。
 
-**csdn**：使用自动化发布方式，浏览器平台页面js自动读取外链图片地址转为平台图片地址，模拟用户发布文章操作；
+也可选择**手动独立安装** uv 环境，使用命令行完成部署：
 
-**掘金**：草稿请求不需要参数认证，发布请求使用自动化发布方式，浏览器平台页面js自动读取外链图片地址转为平台图片地址，完成发布操作；
+**macOS & Linux**
 
-**博客园**：平台提供metaweblog的开放api接口支持(需开启并配置自己账号的api权限)，支持图片素材的上传，直接请求接口发布即可；
+```sh
+# 使用 `curl` 下载脚本并通过 `sh` 执行：
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-**微信公众号**：平台提供开发者的开放api接口支持(需开启并配置自己账号的api权限)，支持图片素材的上传，直接请求接口发布即可；
+# 如果系统没有 `curl`，可以使用 `wget`：
+wget -qO- https://astral.sh/uv/install.sh | sh
+```
 
-**自建博客网站**：以halo为例，一般建站软件都提供个人令牌的用户认证，可直接请求文章发布接口，或读取浏览器的用户cookie作为认证进行发布；
+**Windows**
 
-## 发布一篇文章的操作示例：
+```sh
+# 使用 `irm` 下载脚本并通过 `iex` 执行：
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
 
-将程序打包成.exe或在开发的ide上运行，程序会自动打开谷歌浏览器（必须关闭本地已经运行的谷歌浏览器），访问http://127.0.0.1:8000/，页面如下：
+### 2. 克隆仓库
 
-![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2024-11-29_17-25-32.png)
+1. 克隆仓库并切换至该目录：
 
-默认开启所有的发布源，点击页面的”选择文件“进行本地.md文件的上传，然后点击上传；
+```sh
+git clone https://github.com/Cyanty/one-article-submission.git
+cd one-article-submission
+```
 
-默认未设置无头浏览器，点击上传后会弹出对应网站的自动化操作（如果介意可以开启无头设置）；
+2. 复制环境配置文件：
 
-等待文章发布完，在页面发布结果中会更新发布文章的状态，比如下面的发布结果：
+```sh
+cp .env.example .env
+```
 
-![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2024-11-29_17-47-21.png)
+**Tips**：部分平台支持 API 发布文章，可通过`.env`文件配置所需平台密钥。
 
-接下来就可以在各发布源平台上看到自己发布的文章了。
+3. 构建并运行服务：
 
-## 相关资源收集：
+```sh
+uv run --directory your/path/to/one-article-submission server.py
+```
 
-这里在网络收集了一些发布工具，可供参考：
+### 3. 配置 MCP 客户端
 
-openWrite：一款收费的一文多发软件，通过添加浏览器插件在网站页面上完成文章的发布，支持多个平台，使用较为简便，缺点是部分功能收费，用户cookie会被上传；
+配置您的 MCP 客户端，这里我们以 [Cherry Studio](https://docs.cherry-ai.com/advanced-basic/mcp) 的AI客户端工具为例。
 
-blog-auto-publishing-tools：使用selenium浏览器自动化模拟用户发布操作，支持的平台挺多，自动化方式可以保证功能上的长期稳定，维护起来也较为方便，项目地址：https://github.com/ddean2009/blog-auto-publishing-tools/tree/main
+- 在 `添加服务器` 按钮中点击 `快速创建` 选项，选择 *可流式传输的HTTP (streamableHttp) 类型* ，并添加如下URL：
 
-siyuan-plugin-publisher：思源笔记的一文多发插件，需要使用思源笔记导入/写文章，通过该插件进行文章的发布，使用较为简便，支持的平台也很多，发布时需要注意文章的书写格式，项目地址：https://github.com/terwer/siyuan-plugin-publisher/tree/main
+```http
+http://127.0.0.1:8001/submit/mcp
+```
 
-artipub：一款开源的一文多发平台，后端使用自动化工具Puppeteer模拟发布，功能较为丰富，但是项目已长时间未更新，项目地址：https://github.com/crawlab-team/artipub
+`快速创建`配置如下图所示：
+
+![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2025-07-15_10-56-27.png)
+
+或者 采用JSON配置，
+
+- 在 `添加服务器` 按钮中点击 `从JSON导入` 选项，将以下内容添加到配置文件中：
+
+```json
+{
+  "mcpServers": {
+    "SubmitArticleServer": {
+      "type": "streamableHttp",
+      "url": "http://localhost:8001/submit/mcp"
+    }
+  }
+}
+```
+
+## 使用方法
+
+**Tips**：在开始之前，请确保您的 MCP 客户端已成功完成上述配置。
+
+### 可用工具
+
+可用工具一览：
+
+![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2025-07-15_11-20-14.png)
+
+工具说明：
+
+**help_open_browser**：帮助用户打开一次浏览器（MCP发布浏览器），例如："请帮我打开浏览器"，用户可通过此浏览器进行**账号登录**等操作。
+
+**submit_verify_login**：校验所有发布源平台的账号登录状态，例如："请帮我验证所有平台的登录状态"，用户可通过此方法验证各平台账号登录状态及个人令牌/密钥是否有效。
+
+**get_submit_toggle_switch**：获取当前各发布源的发布开关状态，例如："请告诉我当前各平台的发布开关状态"，发布开关用于为用户标识哪些平台是可以进行发布文章操作的。
+
+**update_submit_toggle_switch**：更新各发布源平台的发布开关状态，例如："请开启CSDN平台的发布开关"，开启平台发布开关可用于发布文章到指定的平台。
+
+**submit_article_content_prompt**：发布文章的文本内容到各平台，例如："将文章的文本内容发布到CSDN上"，等待发布操作完成，就可以在发布的平台上看到自己的文章了。
+
+**submit_article_file_to_platforms**：通过文章的文件路径发布到各平台，例如："帮我把`/your/path/to/file-absolute-path`这篇文章发布到CSDN上"，等待发布操作完成，就可以在发布的平台上看到自己的文章了。
+
+### 发布文章示例
+
+**Tips**：在发布之前，请确保您的 MCP发布浏览器及个人令牌/密钥 -> 处于登录或可用状态。
+
+使用 [Cherry Studio](https://docs.cherry-ai.com/advanced-basic/mcp) 通过聊天的方式发布一篇文章到 CSDN 上。
+
+在新建聊天窗口中，点击 MCP服务器，选中之前配置的 *SubmitArticleServer* MCP服务：
+
+![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2025-07-15_11-25-09.png)
+
+在聊天框中输入，比如："帮我把这篇文章发布到CSDN上。文章的本地路径为：C:\\Users\\Administrator\\Desktop\\发布一篇文章测试.md"，等待大模型返回发布结果：
+
+![](https://raw.githubusercontent.com/Cyanty/images/main/collect/submit_gif_01.gif)
+
+该发布工具同时支持以文本内容的方式进行发布，不过由于集成的AI客户端工具处理方式差异，大模型可能会读取文章全部内容作为上下文，比较耗费Token，耗时也较长。这里推荐使用 *以文件路径的方式* 发布文章。
+
+以文本内容的方式发布，聊天输入示例如下：
+
+![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2025-07-15_11-46-32.png)
+
+## 发布实现
+
+该发布工具为MCP服务提供支持，通过整合各平台发布接口和自动化技术实现高效发布：
+
+- **统一入口**：支持从.md文件直接导入内容，适配MCP服务实现异步并行发布
+
+- **图片处理**：自动转换外链图片为平台兼容的图片链接地址
+
+- **发布方式**：根据不同平台特性采用API调用或浏览器自动化两种策略
+
+目前支持的发布平台（可自定义横向扩展其他平台）
+
+|    平台    |        发布方式         |
+| :--------: | :---------------------: |
+|    CSDN    |       自动化发布        |
+|    掘金    |  草稿API + 自动化发布   |
+|   博客园   |     Metaweblog API      |
+| 微信公众号 |  MD格式美化 + 开放API   |
+|    知乎    | MD格式美化 + 自动化发布 |
+| Halo自建站 |      API/令牌认证       |
+|   ......   |                         |
+
+除此之外，工具还提供了一个发布操作的web页面，用户可在浏览器页面上进行操作，上传本地.md格式文件实现各平台文章的发布。
+
+如：访问 http://127.0.0.1:8001 ，发布页面如下：
+
+![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2025-07-15_14-22-09.png)
+
+## 欢迎贡献
+
+欢迎贡献！无论是修复 bug、添加新功能还是改进文档，都可以随时提交 Pull Request 或打开一个 issue。
+
