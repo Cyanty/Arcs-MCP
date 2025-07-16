@@ -1,25 +1,29 @@
+<h1 align="center">欢迎来到 Arcs-MCP 👋</h1>
 
+![python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&labelColor=61DAFB&style=for-the-badge)         ![fastapi](https://img.shields.io/badge/FastAPI-0.115.11-009688?logo=fastapi&labelColor=61DAFB&style=for-the-badge)         ![uv](https://img.shields.io/badge/uv-0.7.19-DE5FE9?logo=UV&labelColor=61DAFB&style=for-the-badge)         ![chrome](https://img.shields.io/badge/chrome-4285F4?logo=googlechrome&labelColor=61DAFB&style=for-the-badge)         ![license](https://img.shields.io/badge/License-Apache%202.0-blue?labelColor=61DAFB&style=for-the-badge)        ![mcp](https://img.shields.io/badge/MCP-412991?logo=modelcontextprotocol&labelColor=61DAFB&style=for-the-badge) 
+
+---
 
 # 支持MCP服务的多平台一键发布工具
 
-## 概述：
+## 📖 概述
 
 如果有将文章分享发布到多个平台的需求，可以借助这个工具来简化这一流程。该发布工具支持MCP服务，可以让用户使用自然语言处理并实现文章在多个平台的一键式发布。
 
 用户可以描述他们想要实现的效果，例如，“将这篇文章发布到CSDN上。”——工具会自动将文章发布到指定的发布源平台上。
 
-## 前置条件
+## 🔑 前置条件
 
 - 兼容 MCP 的 AI 客户端：Claude 桌面版、Gemini CLI、Cherry Studio 或其他 MCP 客户端。
 - uv：一个现代的 Python 包安装器和解析器。
 
-## 安装与配置
+## 📦 安装与配置
 
 ### 1. 安装 uv 环境
 
 这里推荐使用 [Cherry Studio](https://docs.cherry-ai.com/advanced-basic/mcp) 客户端来配置该工具的MCP服务，操作和环境配置会更加友好。Cherry Studio 还自带了 uv 环境的部署功能，用户可以一键完成安装。
 
-**Tips**：Cherry Studio 目前只使用内置的 [uv](https://github.com/astral-sh/uv) 和 [bun](https://github.com/oven-sh/bun)，**不会复用**系统中已经安装的 uv 和 bun。
+> **Tips**：Cherry Studio 目前只使用内置的 [uv](https://github.com/astral-sh/uv) 和 [bun](https://github.com/oven-sh/bun)，**不会复用**系统中已经安装的 uv 和 bun。
 
 也可选择**手动独立安装** uv 环境，使用命令行完成部署：
 
@@ -45,8 +49,8 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 1. 克隆仓库并切换至该目录：
 
 ```sh
-git clone https://github.com/Cyanty/one-article-submission.git
-cd one-article-submission
+git clone https://github.com/Cyanty/Arcs-MCP.git
+cd Arcs-MCP
 ```
 
 2. 复制环境配置文件：
@@ -55,12 +59,12 @@ cd one-article-submission
 cp .env.example .env
 ```
 
-**Tips**：部分平台支持 API 发布文章，可通过`.env`文件配置所需平台密钥。
+> **Tips**：部分平台支持 API 发布文章，可通过`.env`文件配置所需平台密钥。
 
 3. 构建并运行服务：
 
 ```sh
-uv run --directory your/path/to/one-article-submission server.py
+uv run --directory your/path/to/Arcs-MCP server.py
 ```
 
 ### 3. 配置 MCP 客户端
@@ -92,9 +96,9 @@ http://127.0.0.1:8001/submit/mcp
 }
 ```
 
-## 使用方法
+## 🚀 使用方法
 
-**Tips**：在开始之前，请确保您的 MCP 客户端已成功完成上述配置。
+> **Tips**：在开始之前，请确保您的 MCP 客户端已成功完成上述配置。
 
 ### 可用工具
 
@@ -118,7 +122,7 @@ http://127.0.0.1:8001/submit/mcp
 
 ### 发布文章示例
 
-**Tips**：在发布之前，请确保您的 MCP发布浏览器及个人令牌/密钥 -> 处于登录或可用状态。
+> **Tips**：在发布之前，请确保您的 MCP发布浏览器及个人令牌/密钥 -> 处于登录或可用状态。
 
 使用 [Cherry Studio](https://docs.cherry-ai.com/advanced-basic/mcp) 通过聊天的方式发布一篇文章到 CSDN 上。
 
@@ -136,7 +140,7 @@ http://127.0.0.1:8001/submit/mcp
 
 ![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2025-07-15_11-46-32.png)
 
-## 发布实现
+## ⚡ 发布实现
 
 该发布工具为MCP服务提供支持，通过整合各平台发布接口和自动化技术实现高效发布：
 
@@ -164,7 +168,11 @@ http://127.0.0.1:8001/submit/mcp
 
 ![](https://raw.githubusercontent.com/Cyanty/images/main/collect/Snipaste_2025-07-15_14-22-09.png)
 
-## 欢迎贡献
+## 🤝 欢迎贡献
 
 欢迎贡献！无论是修复 bug、添加新功能还是改进文档，都可以随时提交 Pull Request 或打开一个 issue。
+
+## 📝 License
+
+本项目遵循 [Apache License 2.0](https://opensource.org/licenses/Apache-2.0) 协议，完整文本见 [LICENSE](LICENSE) 文件。
 
