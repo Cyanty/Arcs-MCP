@@ -1,6 +1,13 @@
 <h1 align="center">欢迎来到 Arcs-MCP 👋</h1>
 
-![python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&labelColor=61DAFB&style=for-the-badge)         ![fastapi](https://img.shields.io/badge/FastAPI-0.115.11-009688?logo=fastapi&labelColor=61DAFB&style=for-the-badge)         ![uv](https://img.shields.io/badge/uv-0.7.19-DE5FE9?logo=UV&labelColor=61DAFB&style=for-the-badge)         ![chrome](https://img.shields.io/badge/chrome-4285F4?logo=googlechrome&labelColor=61DAFB&style=for-the-badge)         ![license](https://img.shields.io/badge/License-Apache%202.0-blue?labelColor=61DAFB&style=for-the-badge)        ![mcp](https://img.shields.io/badge/MCP-412991?logo=modelcontextprotocol&labelColor=61DAFB&style=for-the-badge) 
+[![python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
+[![fastapi](https://img.shields.io/badge/FastAPI-0.115.11-009688?logo=fastapi&labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
+[![uv](https://img.shields.io/badge/uv-0.7.19-DE5FE9?logo=UV&labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
+[![chrome](https://img.shields.io/badge/chrome-4285F4?logo=googlechrome&labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue?labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
+[![mcp](https://img.shields.io/badge/MCP-412991?logo=modelcontextprotocol&labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Cyanty/Arcs-MCP)
 
 ---
 
