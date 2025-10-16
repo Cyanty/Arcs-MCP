@@ -6,8 +6,7 @@
 [![chrome](https://img.shields.io/badge/chrome-4285F4?logo=googlechrome&labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue?labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
 [![mcp](https://img.shields.io/badge/MCP-412991?logo=modelcontextprotocol&labelColor=61DAFB&style=for-the-badge)](https://github.com/Cyanty/Arcs-MCP)
-
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Cyanty/Arcs-MCP)
+<a href="https://deepwiki.com/Cyanty/Arcs-MCP"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" style="width: 150px; height: 29px;"></a>
 
 ---
 
